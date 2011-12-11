@@ -17,18 +17,18 @@ public static class CoordinateEngine
                                 //inertial frame of reference (no spinning, velocity is constant)
         public double[] v;      //Velocity of the object.  To start with c(light speed) is 1.0
                                 //(the magnitude of these should never exceed it...)
-        public double t_last_update;
+        public double t_last_update = 0;
                                 //The time coordinate at which the object was most recently updated to.
                                 //This is NOT the same as the time that the object percieves.
+                                //TODO: t_last_update should be either universe creation time (ostensibly 0) or
+                                //given to it in some way.  If an object is created after t=0 the first step will be
+                                //MUCH bigger.
                                 
         //Derived Physical State Variables: should be updated every frame based on the class's update methods
         public double vrms;     //sqrt(sumsq(vx,vy,vz))
         public double gamma;    //Lorentz factor.  gamma=1/sqrt(1-vrms^2).  Should ONLY be updated with this in mind
         public double t_object; //Time elapsed as observed by the object.
                                 //If it wore a watch, this is what it would say.
-
-     
-        
 
         
         //Ideas for later consideration:
@@ -41,6 +41,7 @@ public static class CoordinateEngine
         //If proper time is not given, it will assume 0 (clock starts at 0, representing the object's proper "age"
         //If no velocity is given, it will assume v=0 (vector sense)
         
+        //TODO: must initialize t_last_update
         public RelativisticObject(double[] xin, double[]vin, double t_object_in = 0)
         {
             Debug.Assert(xin.Length==vin.Length);
@@ -94,8 +95,13 @@ public static class CoordinateEngine
         }
         
         //Methods
-            
-            
+        
+        //Will initialize t_last_update to be consistent with the camera's (bro's) perception 
+        //Right now is no different than accessing it directly
+        void initializeLastUpdateTime(double init_t_update)
+        {
+            t_last_update = init_t_update;
+        }
         
         //Update gamma based on v[].  Also updates vrms.
         public void updateGamma()
@@ -104,13 +110,23 @@ public static class CoordinateEngine
             gamma = computeGamma(vrms);
         }
         //Update position to new time based on moving to requested_time assuming constant v[]
-        public void updatePosition(double requested_time)
+        //requested_target_time is by the universe's clock
+        //Suggested way to call this is is objectname.updatePositionByDrifting(universe_time-referencePositionDifference(camera, thisobject))
+        public void updatePositionByDrifting(double requested_target_time)
         {
-            Debug.Assert(requested_time>t_last_update,
-            "It seems we are seeing something move back in time unexpectedly");
-            throw new NotImplementedException();
-        }
-        
+            double interval = requested_target_time - t_last_update;
+            Debug.Assert(requested_target_time>t_last_update || interval<0,
+            "It seems we are seeing something move back in time unexpectedly.  Did you initializeLastUpdateTime(double init_t_update) ?");
+            //update position
+            for(int i=0;i<x.Length;i++)
+            {
+                x[i] += v[i]*interval;//Yes for this calculation it is that simple, (up to perspective changing, a 2nd order effect)
+            }
+            //update t
+            t_last_update = requested_target_time;
+            //update proper t (t_object)
+            t_object += interval/gamma;
+        }        
     }
 
     //Functions that operate on at least one RelativisticObject
