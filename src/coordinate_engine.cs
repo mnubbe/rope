@@ -37,72 +37,71 @@ public static class CoordinateEngine
         //public string name;    //In case we wish to name our object
         
         
-        //Constructors
+        //Constructors: We need to define at minimum the position, velocity, and proper time
+        //If proper time is not given, it will assume 0 (clock starts at 0, representing the object's proper "age"
+        //If no velocity is given, it will assume v=0 (vector sense)
         
-		public RelativisticObject(double[] xin, double[]vin, double t_object_in = 0)
-		{
-			Debug.Assert(xin.Length==vin.Length);
-			x = new double[xin.Length];
-			v = new double[vin.Length];
-			for(int i=0;i<xin.Length;i++){
-				x[i]=xin[i];
-				v[i]=vin[i];
-			}
-			//x=xin.Clone; //I am sad the following do not work
-			//v=vin.Clone;
-			t_object = t_object_in;
-			updateGamma();
-		}
-		public RelativisticObject(double xin,double yin,double zin,double vxin,double vyin,double vzin,double t_object_in = 0){				
-			x = new double[3];
-			v = new double[3];
-			x[0]=xin;
-			x[1]=yin;
-			x[2]=zin;
-			v[0]=vxin;
-			v[1]=vyin;
-			v[2]=vzin;
-			t_object = t_object_in;
-			updateGamma();
-		}
-		public RelativisticObject(double[] xin, double t_object_in = 0){//Assumes v=0
-			//Should probably have this as an override or something
-			//x = xin.Clone();
-			x = new double[xin.Length];
-			for(int i=0;i<xin.Length;i++){
-				x[i]=xin[i];
-			}
-			v = new double[3];
-			for(int i=0;i<3;i++)
-				v[i]=0.0;
-			t_object=t_object_in;
-			updateGamma();
-		}
-		public RelativisticObject(double xin, double yin, double zin, double t_object_in = 0){//Assumes v=0
-			//Should probably have this as an override or something
-			x = new double[3];
-			x[0]=xin;
-			x[1]=yin;
-			x[2]=zin;
-			v = new double[3];
-			for(int i=0;i<3;i++)
-				v[i]=0.0;
-			t_object=t_object_in;
-			updateGamma();
-		}
+        public RelativisticObject(double[] xin, double[]vin, double t_object_in = 0)
+        {
+            Debug.Assert(xin.Length==vin.Length);
+            x = new double[xin.Length];
+            v = new double[vin.Length];
+            for(int i=0;i<xin.Length;i++){
+                x[i]=xin[i];
+                v[i]=vin[i];
+            }
+            //x=xin.Clone; //I am sad the following do not work
+            //v=vin.Clone;
+            t_object = t_object_in;
+            updateGamma();
+        }
+        public RelativisticObject(double xin,double yin,double zin,double vxin,double vyin,double vzin,double t_object_in = 0){                
+            x = new double[3];
+            v = new double[3];
+            x[0]=xin;
+            x[1]=yin;
+            x[2]=zin;
+            v[0]=vxin;
+            v[1]=vyin;
+            v[2]=vzin;
+            t_object = t_object_in;
+            updateGamma();
+        }
+        public RelativisticObject(double[] xin, double t_object_in = 0){//Assumes v=0
+            //Should probably have this as an override or something
+            //x = xin.Clone();
+            x = new double[xin.Length];
+            for(int i=0;i<xin.Length;i++){
+                x[i]=xin[i];
+            }
+            v = new double[3];
+            for(int i=0;i<3;i++)
+                v[i]=0.0;
+            t_object=t_object_in;
+            updateGamma();
+        }
+        public RelativisticObject(double xin, double yin, double zin, double t_object_in = 0){//Assumes v=0
+            //Should probably have this as an override or something
+            x = new double[3];
+            x[0]=xin;
+            x[1]=yin;
+            x[2]=zin;
+            v = new double[3];
+            for(int i=0;i<3;i++)
+                v[i]=0.0;
+            t_object=t_object_in;
+            updateGamma();
+        }
         
         //Methods
-			
-			
+            
+            
         
         //Update gamma based on v[].  Also updates vrms.
         public void updateGamma()
         {
-			vrms = RMS (v);
-			double answer = 1.0-vrms;
-			Debug.Assert(vrms<1.0, "Speed of light is exceeded on gamma calculation");
-			answer = 1.0/Math.Sqrt(answer);//This line also will complain about vrms>1.0
-            gamma = answer;
+            vrms = RMS (v);
+            gamma = computeGamma(vrms);
         }
         //Update position to new time based on moving to requested_time assuming constant v[]
         public void updatePosition(double requested_time)
@@ -126,9 +125,9 @@ public static class CoordinateEngine
         Debug.Assert(RMS(answer)<=1, "Speed of light exceeded");//This should never exceed c unless we have tacheons, which can break other parts of the simulation
         return answer;
     }
-	
+    
     //Returns the relativistic sum of two velocities.  Does not require a RelativisticObject but likely to use RelativisticObject.v
-	public static double[] velocitySum(double[] v1, double[] v2)
+    public static double[] velocitySum(double[] v1, double[] v2)
     {
         Debug.Assert(v1.Length == v2.Length, "Coordinate dimensionality mismatch");
         double[] answer =  new double[v1.Length];
@@ -171,6 +170,19 @@ public static class CoordinateEngine
     }
     
     //Returns 1/sqrt(RMS(v))
-    //public static double gamma(double[] v){}
+    public static double computeGamma(double[] v)
+    {
+        double answer = 1.0-RMS(v);
+        Debug.Assert(RMS(v)<1.0, "Speed of light is exceeded on gamma calculation");
+        answer = 1.0/Math.Sqrt(answer);//This line also will complain about vrms>1.0
+        return answer;
+    }
+    public static double computeGamma(double vrms)
+    {
+        double answer = 1.0-vrms;
+        Debug.Assert(vrms<1.0, "Speed of light is exceeded on gamma calculation");
+        answer = 1.0/Math.Sqrt(answer);//This line also will complain about vrms>1.0
+        return answer;
+    }
 
 }
