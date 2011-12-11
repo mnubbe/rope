@@ -5,6 +5,6 @@ public class rope
     public static void Main()
     {
         System.Console.WriteLine("Running program...");
-        exit 0;
+        System.Environment.Exit(0);
     }
 }
