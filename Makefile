@@ -12,7 +12,7 @@
 # of all .cpp files.
 
 CC = mcs
-SRCS = $(wildcard *.cs)
+SRCS = $(wildcard src/*.cs)
 #No headers in csharp
 #HDRS = $(wildcard *.h)
 #not sure if this translates to C#
@@ -33,6 +33,7 @@ LIBS =
 all: $(APP)
 
 $(APP):
+#	$(CC) $(LDFLAGS) $(SRCS) -out:$(APP) $(LIBS)
 	$(CC) $(LDFLAGS) $(SRCS) -out:$(APP) $(LIBS)
 #$(APP): $(OBJS)
 #	$(CC) $(LDFLAGS) $(OBJS) -o $(APP) $(LIBS)
