@@ -111,7 +111,8 @@ public static class CoordinateEngine
         }
         //Update position to new time based on moving to requested_time assuming constant v[]
         //requested_target_time is by the universe's clock
-        //Suggested way to call this is is objectname.updatePositionByDrifting(universe_time-referencePositionDifference(camera, thisobject))
+        //Suggested way to call this is is objectname.updatePositionByDrifting(universe_time-RMS(referencePositionDifference(camera, thisobject)))
+        //Or object.updatePositionByDrifting(observedUniverseTime(universe_time, camera))
         public void updatePositionByDrifting(double requested_target_time)
         {
             double interval = requested_target_time - t_last_update;
@@ -126,7 +127,11 @@ public static class CoordinateEngine
             t_last_update = requested_target_time;
             //update proper t (t_object)
             t_object += interval/gamma;
-        }        
+        }
+        double observedUniverseTime(double universe_time, RelativisticObject camera)
+        {
+            return universe_time-RMS(referencePositionDifference(camera, this));
+        }
     }
 
     //Functions that operate on at least one RelativisticObject
