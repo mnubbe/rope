@@ -6,11 +6,14 @@ using System.Threading;
 public class dummyrope{
     public static void Main()
     {
+        //Strategy: run most of the program as an instance of the rope class.
+        //Allows some ease for things like volatile variables to be shared.
         rope ProgramInstance = new rope();
         ProgramInstance.Run();
     }
 }
 
+//Primary class for the program.
 public class rope
 {
     //Common member variables
@@ -30,20 +33,20 @@ public class rope
     //Constructor (blank)
     public rope(){}
     
+    //Effective entry point for the program
     public void Run(){
         starting_time = DateTime.Now;
         StartApplicationThread();
-        //while(true) or while(!exit)
-        //for(int i=0;i<100;i++)
-        while(ApplicationThread !=null)
+        while(ApplicationThread !=null) //Runs until the window is closed or closes itself
         {
-            //Update universal time, must be accomplished quickly
-            
+            //Update universal time, must be accomplished in a short period of time for consistency
             current_frame = DateTime.Now;
             elapsed_time = current_frame.Subtract(starting_time);
             observer_proper_time = elapsed_time.TotalSeconds;
-            
+            //TODO: universe_time += delta_observer_proper_time/camera.gamma;
         
+            //Test code for seeing that it is stepping through the frames.
+            //Note: ToString is not very useful for most objects unless overriden
             Console.WriteLine (string.Format("{0:F2} seconds have elapsed, state is {1}",observer_proper_time, camera.ToString()));
         
         
@@ -57,7 +60,9 @@ public class rope
         }
     }
 
-    
+    //Starts this thread, then returns on the original thread.  Each thread has access to the same class variables.
+    //Note that this could cause issues if both try to use the same one at the same time.  A lock statement can help
+    //Alleviate this problem.
     public void StartApplicationThread()
     {
         ApplicationThread = new System.Threading.Thread(ApplicationThreadMethod);
@@ -69,14 +74,12 @@ public class rope
         ApplicationThread.Abort();
         ApplicationThread = null;
     }
-    
     public void ApplicationThreadMethod()
     {
-        
         Application.Init();
         new Canvas();
         Application.Run();
-        ApplicationThread = null; //Upon exit
+        ApplicationThread = null; //Upon exit of Application.Run()
     }
 }
 
