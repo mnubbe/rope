@@ -5,27 +5,27 @@
 using Gtk;
 using System.Threading;
 
-public class rope
+public class Rope
 {
-    private static Thread renderer;
-    private static Thread engineer;
-    private static Universe universe;
-    private static Canvas canvas;
+    private Thread renderer;
+    private Thread engineer;
+    private Universe universe;
+    private Canvas canvas;
 
-    public static void Main()
+    public void Start()
     {
         Application.Init();
         renderer = new Thread(RenderThread);
         engineer = new Thread(EngineThread);
         universe = new Universe(); // Let there be light.
-        canvas = new Canvas(universe);
+        canvas = new Canvas(this, universe);
 
         renderer.Start();
         engineer.Start();
         Application.Run();
     }
 
-    public static void RenderThread()
+    public void RenderThread()
     {
         while (true) {
             canvas.Draw();
@@ -33,12 +33,27 @@ public class rope
         }
     }
 
-    public static void EngineThread()
+    public void EngineThread()
     {
         while (true) {
             // engine.Tick();
             Thread.Sleep(20);
         }
+    }
+
+    public void Shutdown()
+    {
+        renderer.Abort();
+        engineer.Abort();
+    }
+}
+
+
+public class EntryPoint
+{
+    public static void Main()
+    {
+        new Rope().Start();
     }
 }
 

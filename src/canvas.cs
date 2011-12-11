@@ -5,40 +5,30 @@ using System.Collections.Generic;
 
 public class Canvas : Window
 {
+    private Rope rope;
     private Universe universe;
+    private Pango.Layout layout;
+    private Gtk.DrawingArea drawing_area;
+    private int width = 500;
+    private int height = 500;
 
 
-    private class Whiteboard : DrawingArea
+    public Canvas(Rope r, Universe u) : base("rope rope rope")
     {
-        protected override bool OnExposeEvent(Gdk.EventExpose args)
-        {
-            using (Context c = Gdk.CairoHelper.Create(args.Window))
-            {
-                c.MoveTo(0, 0);
-                c.Arc(100, 100, 50, Math.PI, -Math.PI);
-                c.Color = new Color(0, 0, 0);
-                c.LineWidth = 5;
-                c.Stroke();
-            }
-            return true;
-        }
-    }
-
-
-    public Canvas(Universe u) : base("Center")
-    {
+        rope = r;
         universe = u;
 
         // Configure window.
-        SetDefaultSize(400, 400);
-        SetPosition(WindowPosition.Center);
+        layout = new Pango.Layout(this.PangoContext);
+        layout.Width = Pango.Units.FromPixels(width);
 
         // Add drawable components.
-        Box b = new HBox(true, 0);
-        b.Add(new Whiteboard());
-        Add(b);
+        drawing_area = new Gtk.DrawingArea();
+        drawing_area.SetSizeRequest(width, height);
+        Add(drawing_area);
 
         // Add Event handlers.
+        DeleteEvent += delegate { r.Shutdown(); };
         DeleteEvent += delegate { Application.Quit(); };
 
         ShowAll();
@@ -47,16 +37,23 @@ public class Canvas : Window
 
     public void Draw()
     {
-        List<CoordinateEngine.RelativisticObject> npcs = universe.getNPCs();
-        foreach (CoordinateEngine.RelativisticObject npc in npcs) {
-            DrawObject(npc);
+        using (Context context = Gdk.CairoHelper.Create(drawing_area.GdkWindow))
+        {
+            DrawObject(context, new CoordinateEngine.RelativisticObject(150,
+                        150, 150));
+            List<CoordinateEngine.RelativisticObject> npcs = universe.getNPCs();
+            foreach (CoordinateEngine.RelativisticObject npc in npcs) {
+                DrawObject(context, npc);
+            }
         }
     }
 
 
-    public void DrawObject(CoordinateEngine.RelativisticObject obj)
+    public void DrawObject(Context context, CoordinateEngine.RelativisticObject obj)
     {
-
+        context.Color = new Color(255, 255, 255);
+        context.Rectangle(new PointD(obj.x[0], obj.x[1]), 5, 5); 
+        context.Stroke();
     }
 }
 
