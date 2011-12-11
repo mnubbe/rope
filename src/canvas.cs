@@ -1,9 +1,13 @@
 using Cairo;
 using Gtk;
 using System;
+using System.Collections.Generic;
 
 public class Canvas : Window
 {
+    private Universe universe;
+
+
     private class Whiteboard : DrawingArea
     {
         protected override bool OnExposeEvent(Gdk.EventExpose args)
@@ -21,8 +25,10 @@ public class Canvas : Window
     }
 
 
-    public Canvas() : base("Center")
+    public Canvas(Universe u) : base("Center")
     {
+        universe = u;
+
         // Configure window.
         SetDefaultSize(400, 400);
         SetPosition(WindowPosition.Center);
@@ -36,6 +42,21 @@ public class Canvas : Window
         DeleteEvent += delegate { Application.Quit(); };
 
         ShowAll();
+    }
+
+
+    public void Draw()
+    {
+        List<CoordinateEngine.RelativisticObject> npcs = universe.getNPCs();
+        foreach (CoordinateEngine.RelativisticObject npc in npcs) {
+            DrawObject(npc);
+        }
+    }
+
+
+    public void DrawObject(CoordinateEngine.RelativisticObject obj)
+    {
+
     }
 }
 
