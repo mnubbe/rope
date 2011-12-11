@@ -22,7 +22,7 @@ public static class CoordinateEngine
                                 //This is NOT the same as the time that the object percieves.
                                 
         //Derived Physical State Variables: should be updated every frame based on the class's update methods
-        //public double vrms;   //sqrt(sumsq(vx,vy,vz))
+        public double vrms;     //sqrt(sumsq(vx,vy,vz))
         public double gamma;    //Lorentz factor.  gamma=1/sqrt(1-vrms^2).  Should ONLY be updated with this in mind
         public double t_object; //Time elapsed as observed by the object.
                                 //If it wore a watch, this is what it would say.
@@ -39,13 +39,70 @@ public static class CoordinateEngine
         
         //Constructors
         
+		public RelativisticObject(double[] xin, double[]vin, double t_object_in = 0)
+		{
+			Debug.Assert(xin.Length==vin.Length);
+			x = new double[xin.Length];
+			v = new double[vin.Length];
+			for(int i=0;i<xin.Length;i++){
+				x[i]=xin[i];
+				v[i]=vin[i];
+			}
+			//x=xin.Clone; //I am sad the following do not work
+			//v=vin.Clone;
+			t_object = t_object_in;
+			updateGamma();
+		}
+		public RelativisticObject(double xin,double yin,double zin,double vxin,double vyin,double vzin,double t_object_in = 0){				
+			x = new double[3];
+			v = new double[3];
+			x[0]=xin;
+			x[1]=yin;
+			x[2]=zin;
+			v[0]=vxin;
+			v[1]=vyin;
+			v[2]=vzin;
+			t_object = t_object_in;
+			updateGamma();
+		}
+		public RelativisticObject(double[] xin, double t_object_in = 0){//Assumes v=0
+			//Should probably have this as an override or something
+			//x = xin.Clone();
+			x = new double[xin.Length];
+			for(int i=0;i<xin.Length;i++){
+				x[i]=xin[i];
+			}
+			v = new double[3];
+			for(int i=0;i<3;i++)
+				v[i]=0.0;
+			t_object=t_object_in;
+			updateGamma();
+		}
+		public RelativisticObject(double xin, double yin, double zin, double t_object_in = 0){//Assumes v=0
+			//Should probably have this as an override or something
+			x = new double[3];
+			x[0]=xin;
+			x[1]=yin;
+			x[2]=zin;
+			v = new double[3];
+			for(int i=0;i<3;i++)
+				v[i]=0.0;
+			t_object=t_object_in;
+			updateGamma();
+		}
         
         //Methods
+			
+			
         
-        //Update gamma based on v[]
+        //Update gamma based on v[].  Also updates vrms.
         public void updateGamma()
         {
-            throw new NotImplementedException();
+			vrms = RMS (v);
+			double answer = 1.0-vrms;
+			Debug.Assert(vrms<1.0, "Speed of light is exceeded on gamma calculation");
+			answer = 1.0/Math.Sqrt(answer);//This line also will complain about vrms>1.0
+            gamma = answer;
         }
         //Update position to new time based on moving to requested_time assuming constant v[]
         public void updatePosition(double requested_time)
@@ -69,6 +126,18 @@ public static class CoordinateEngine
         Debug.Assert(RMS(answer)<=1, "Speed of light exceeded");//This should never exceed c unless we have tacheons, which can break other parts of the simulation
         return answer;
     }
+	
+    //Returns the relativistic sum of two velocities.  Does not require a RelativisticObject but likely to use RelativisticObject.v
+	public static double[] velocitySum(double[] v1, double[] v2)
+    {
+        Debug.Assert(v1.Length == v2.Length, "Coordinate dimensionality mismatch");
+        double[] answer =  new double[v1.Length];
+        for(int i=0;i<v1.Length;i++){
+            answer[i]= (v1[i] + v2[i])/(1.0 +  v1[i] * v2[i]);
+        }
+        Debug.Assert(RMS(answer)<=1, "Speed of light exceeded");//This should never exceed c unless we have tacheons, which will break other parts of the simulation
+        return answer;
+    }
     
     //Returns the relative position difference as seen by the observer RelativisticObject
     //public static double[] observedPositionDifference(RelativisticObject observer, RelativisticObject actor)
@@ -86,7 +155,7 @@ public static class CoordinateEngine
     
     //Functions that may be useful to have
     
-    //RMS=Root Mean Squared.  Also known as the distance formula
+    //RMS=Root Mean Squared.  Also known by the distance formula or vector magnitude
     public static double RMS(double a,double b,double c)
     {
         return 1.0/Math.Sqrt(a*a+b*b+c*c);
