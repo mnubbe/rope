@@ -13,5 +13,5 @@ $(APP):
 	$(CC) -debug $(LDFLAGS) $(SRCS) -out:$(APP) $(LIBS)
 
 clean:
-	rm -f $(APP)
+	rm -f $(APP) $(APP).mdb
 
