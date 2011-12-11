@@ -20,7 +20,7 @@ public class Universe
     private TimeSpan elapsed_time;
     
 
-    public List<CoordinateEngine.RelativisticObject> getNPCs()
+    public List<CoordinateEngine.RelativisticObject> GetNPCs()
     {
         return dudes;
     }

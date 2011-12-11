@@ -41,7 +41,7 @@ public class Canvas : Window
         {
             DrawObject(context, new CoordinateEngine.RelativisticObject(150,
                         150, 150));
-            List<CoordinateEngine.RelativisticObject> npcs = universe.getNPCs();
+            List<CoordinateEngine.RelativisticObject> npcs = universe.GetNPCs();
             foreach (CoordinateEngine.RelativisticObject npc in npcs) {
                 DrawObject(context, npc);
             }
