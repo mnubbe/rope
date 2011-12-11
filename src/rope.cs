@@ -1,10 +1,13 @@
 //Entry point for the program
+using Gtk;
 
 public class rope
 {
     public static void Main()
     {
-        System.Console.WriteLine("Running program...");
-        System.Environment.Exit(0);
+        Application.Init();
+        new Canvas();
+        Application.Run();
     }
 }
+
