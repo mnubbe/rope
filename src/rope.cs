@@ -3,6 +3,7 @@
  */
 
 using Gtk;
+using System.Collections.Generic;
 using System.Threading;
 
 public class Rope
@@ -28,15 +29,23 @@ public class Rope
     public void RenderThread()
     {
         while (true) {
-            canvas.Draw();
+            lock (universe) {
+                canvas.Draw();
+            }
             Thread.Sleep(20);
         }
     }
 
     public void EngineThread()
     {
+        int tick = 0;
         while (true) {
-            // engine.Tick();
+            lock (universe) {
+                List<CoordinateEngine.RelativisticObject> objs = universe.GetNPCs();
+                objs.Clear();
+                objs.Add(new CoordinateEngine.RelativisticObject(tick % 500, tick % 500, tick % 500));
+            }
+            tick++;
             Thread.Sleep(20);
         }
     }

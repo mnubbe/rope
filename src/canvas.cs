@@ -37,10 +37,9 @@ public class Canvas : Window
 
     public void Draw()
     {
+        drawing_area.GdkWindow.Clear();
         using (Context context = Gdk.CairoHelper.Create(drawing_area.GdkWindow))
         {
-            DrawObject(context, new CoordinateEngine.RelativisticObject(150,
-                        150, 150));
             List<CoordinateEngine.RelativisticObject> npcs = universe.GetNPCs();
             foreach (CoordinateEngine.RelativisticObject npc in npcs) {
                 DrawObject(context, npc);
