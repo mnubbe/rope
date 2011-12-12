@@ -11,12 +11,14 @@ public class Canvas : Window
     private Gtk.DrawingArea drawing_area;
     private int width = 500;
     private int height = 500;
+    public bool[] keyflags = new bool[255];
 
 
     public Canvas(Rope r, Universe u) : base("rope rope rope")
     {
         rope = r;
         universe = u;
+        initKeyFlags();
 
         // Configure window.
         layout = new Pango.Layout(this.PangoContext);
@@ -30,6 +32,8 @@ public class Canvas : Window
         // Add Event handlers.
         DeleteEvent += delegate { r.Shutdown(); };
         DeleteEvent += delegate { Application.Quit(); };
+        this.drawing_area.KeyPressEvent += new global::Gtk.KeyPressEventHandler (this.OnDrawingarea1KeyPressEvent);
+        this.drawing_area.KeyReleaseEvent += new global::Gtk.KeyReleaseEventHandler (this.OnDrawingarea1KeyReleaseEvent);
 
         ShowAll();
     }
@@ -54,5 +58,40 @@ public class Canvas : Window
         context.Rectangle(new PointD(obj.x[0], obj.x[1]), 5, 5); 
         context.Stroke();
     }
+    
+    #region keybinding
+    //Keybinding functionality
+    
+    //Please don't forget calling this in a constructor:
+    public void initKeyFlags(){
+        for(int i=0;i<255;i++)
+            keyflags[i]=false;
+    }
+    
+    public void UpdateKeyIsDown (bool IsPressed, char key){
+        if(key>=0 && key<255)//Note: sizeof(char)=2 in .NET
+            keyflags[key]=IsPressed;
+        Console.WriteLine(String.Format("Key {0} is now {1}",key,IsPressed));
+    }
+    
+    protected void OnDrawingarea1KeyPressEvent (object o, Gtk.KeyPressEventArgs args)
+    {
+        UpdateKeyIsDown(true, args.Event.Key.ToString()[0]);
+        Console.Write (args.Event.Key.ToString());
+    }
+
+    protected void OnDrawingarea1KeyReleaseEvent (object o, Gtk.KeyReleaseEventArgs args)
+    {
+        UpdateKeyIsDown(false, args.Event.Key.ToString()[0]);
+        Console.Write (args.Event.Key.ToString());
+    }
+    /*
+    Other parts of keybinding functionality:
+        this.drawing_area.KeyPressEvent += new global::Gtk.KeyPressEventHandler (this.OnDrawingarea1KeyPressEvent);
+        this.drawing_area.KeyReleaseEvent += new global::Gtk.KeyReleaseEventHandler (this.OnDrawingarea1KeyReleaseEvent);
+        //Having a drawing_area to begin with
+        public bool[] keyflags = new bool[255];
+    */
+    #endregion
 }
 
