@@ -3,6 +3,7 @@
  */
 
 using Gtk;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -12,6 +13,7 @@ public class Rope
     private Thread engineer;
     private Universe universe;
     private Canvas canvas;
+    private List<CoordinateEngine.RelativisticObject> objs;
 
     public void Start()
     {
@@ -19,6 +21,7 @@ public class Rope
         renderer = new Thread(RenderThread);
         engineer = new Thread(EngineThread);
         universe = new Universe(); // Let there be light.
+        objs = universe.GetNPCs();
         canvas = new Canvas(this, universe);
 
         renderer.Start();
@@ -29,9 +32,12 @@ public class Rope
     public void RenderThread()
     {
         while (true) {
-            lock (universe) {
+            DateTime start = DateTime.Now;
+            lock (objs) {
                 canvas.Draw();
             }
+            double ms_taken = (DateTime.Now - start).TotalMilliseconds;
+            Console.WriteLine(String.Format("REND: {0:f} ms", ms_taken));
             Thread.Sleep(20);
         }
     }
@@ -40,11 +46,13 @@ public class Rope
     {
         int tick = 0;
         while (true) {
-            lock (universe) {
-                List<CoordinateEngine.RelativisticObject> objs = universe.GetNPCs();
+            DateTime start = DateTime.Now;
+            lock (objs) {
                 objs.Clear();
                 objs.Add(new CoordinateEngine.RelativisticObject(tick % 500, tick % 500, tick % 500));
             }
+            double ms_taken = (DateTime.Now - start).TotalMilliseconds;
+            Console.WriteLine(String.Format("REND: {0:f} ms", ms_taken));
             tick++;
             Thread.Sleep(20);
         }
