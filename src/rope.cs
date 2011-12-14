@@ -36,17 +36,16 @@ public class Rope
         }
     }
 
-    public void EngineThread()
+    public void EngineThread ()
     {
         int tick = 0;
         while (true) {
             lock (universe) {
-                List<CoordinateEngine.RelativisticObject> objs = universe.GetNPCs();
-                objs.Clear();
-                objs.Add(new CoordinateEngine.RelativisticObject(tick % 500, tick % 500, tick % 500));
+                universe.UpdateDudes ();
+                universe.universe_time += 0.020;
             }
             tick++;
-            Thread.Sleep(20);
+            Thread.Sleep (20);
         }
     }
 

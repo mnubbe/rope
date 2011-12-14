@@ -3,6 +3,7 @@ using System;
 //using NUnit.Framework;
 
 public static class CoordinateEngine
+//namespace CoordinateEngine
 {
     //An object, be it the camera, a rock, or otherwise, in the simulation
     public class RelativisticObject
@@ -130,9 +131,11 @@ public static class CoordinateEngine
             //update proper t (t_object)
             t_object += interval/gamma;
         }
-        double observedUniverseTime(double universe_time, RelativisticObject camera)
+        public double observedUniverseTime (double universe_time, RelativisticObject camera)
         {
-            return universe_time-RMS(referencePositionDifference(camera, this));
+            double t;
+            t = (universe_time - RMS (referencePositionDifference (camera, this)));
+            return t;
         }
     }
 
@@ -180,7 +183,7 @@ public static class CoordinateEngine
     //RMS=Root Mean Squared.  Also known by the distance formula or vector magnitude
     public static double RMS(double a,double b,double c)
     {
-        return 1.0/Math.Sqrt(a*a+b*b+c*c);
+        return Math.Sqrt(a*a+b*b+c*c);
     }
     public static double RMS(double[] a)
     {
@@ -189,7 +192,7 @@ public static class CoordinateEngine
         {
             sum+=x*x;
         }
-        return 1.0/System.Math.Sqrt(sum);
+        return System.Math.Sqrt(sum);
     }
     
     //Returns 1/sqrt(RMS(v))
