@@ -2,14 +2,13 @@
  * Entry point for the program
  */
 
-using Gtk;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 
+
 public class Rope
 {
-    private Thread renderer;
     private Thread engineer;
     private Universe universe;
     private Canvas canvas;
@@ -17,29 +16,15 @@ public class Rope
 
     public void Start()
     {
-        Application.Init();
-        renderer = new Thread(RenderThread);
         engineer = new Thread(EngineThread);
         universe = new Universe(); // Let there be light.
         objs = universe.GetNPCs();
         canvas = new Canvas(this, universe);
+        //Utilities.SetWindowTitle("rope rope rope");
 
-        renderer.Start();
         engineer.Start();
-        Application.Run();
-    }
-
-    public void RenderThread()
-    {
-        while (true) {
-            DateTime start = DateTime.Now;
-            lock (objs) {
-                canvas.Draw();
-            }
-            double ms_taken = (DateTime.Now - start).TotalMilliseconds;
-            Console.WriteLine(String.Format("REND: {0:f} ms", ms_taken));
-            Thread.Sleep(20);
-        }
+        canvas.Run(30.0, 0.0);
+        Shutdown();
     }
 
     public void EngineThread()
@@ -52,7 +37,7 @@ public class Rope
                 objs.Add(new CoordinateEngine.RelativisticObject(tick % 500, tick % 500, tick % 500));
             }
             double ms_taken = (DateTime.Now - start).TotalMilliseconds;
-            Console.WriteLine(String.Format("REND: {0:f} ms", ms_taken));
+            Console.WriteLine(String.Format("PHYS: {0:f} ms", ms_taken));
             tick++;
             Thread.Sleep(20);
         }
@@ -60,7 +45,6 @@ public class Rope
 
     public void Shutdown()
     {
-        renderer.Abort();
         engineer.Abort();
     }
 }

@@ -1,97 +1,122 @@
-using Cairo;
-using Gtk;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Threading;
 
-public class Canvas : Window
+using OpenTK;
+using Graphics = OpenTK.Graphics;
+using OpenGL = OpenTK.Graphics.OpenGL;
+
+public class Canvas : GameWindow
 {
     private Rope rope;
     private Universe universe;
-    private Pango.Layout layout;
-    private Gtk.DrawingArea drawing_area;
-    private int width = 500;
-    private int height = 500;
-    public bool[] keyflags = new bool[255];
+    private float rotation_speed = 180.0f;
+    private float angle;
 
 
-    public Canvas(Rope r, Universe u) : base("rope rope rope")
+    public Canvas(Rope r, Universe u) : base(500, 500, new Graphics::GraphicsMode(16, 16))
     {
         rope = r;
         universe = u;
-        initKeyFlags();
-
-        // Configure window.
-        layout = new Pango.Layout(this.PangoContext);
-        layout.Width = Pango.Units.FromPixels(width);
-
-        // Add drawable components.
-        drawing_area = new Gtk.DrawingArea();
-        drawing_area.SetSizeRequest(width, height);
-        Add(drawing_area);
-
-        // Add Event handlers.
-        DeleteEvent += delegate { r.Shutdown(); };
-        DeleteEvent += delegate { Application.Quit(); };
-        this.drawing_area.KeyPressEvent += new global::Gtk.KeyPressEventHandler (this.OnDrawingarea1KeyPressEvent);
-        this.drawing_area.KeyReleaseEvent += new global::Gtk.KeyReleaseEventHandler (this.OnDrawingarea1KeyReleaseEvent);
-
-        ShowAll();
     }
 
 
-    public void Draw()
+    protected override void OnLoad(EventArgs e)
     {
-        drawing_area.GdkWindow.Clear();
-        using (Context context = Gdk.CairoHelper.Create(drawing_area.GdkWindow))
-        {
-            List<CoordinateEngine.RelativisticObject> npcs = universe.GetNPCs();
-            foreach (CoordinateEngine.RelativisticObject npc in npcs) {
-                DrawObject(context, npc);
-            }
+        base.OnLoad(e);
+
+        OpenGL::GL.ClearColor(Color.Black);
+        OpenGL::GL.Enable(OpenGL::EnableCap.DepthTest);
+    }
+
+
+    protected override void OnResize(EventArgs e)
+    {
+        base.OnResize(e);
+
+        OpenGL::GL.Viewport(0, 0, Width, Height);
+
+        double aspect_ratio = Width / (double)Height;
+
+        OpenTK.Matrix4 perspective = OpenTK.Matrix4.CreatePerspectiveFieldOfView(MathHelper.PiOver4, (float)aspect_ratio, 1, 64);
+        OpenGL::GL.MatrixMode(OpenGL::MatrixMode.Projection);
+        OpenGL::GL.LoadMatrix(ref perspective);
+    }
+
+
+    protected override void OnUpdateFrame(FrameEventArgs e)
+    {
+        base.OnUpdateFrame(e);
+
+        if (Keyboard[OpenTK.Input.Key.Escape]) {
+            this.Exit();
+            return;
         }
     }
 
 
-    public void DrawObject(Context context, CoordinateEngine.RelativisticObject obj)
+    protected override void OnRenderFrame(FrameEventArgs e)
     {
-        context.Color = new Color(255, 255, 255);
-        context.Rectangle(new PointD(obj.x[0], obj.x[1]), 5, 5); 
-        context.Stroke();
-    }
-    
-    #region keybinding
-    //Keybinding functionality
-    
-    //Please don't forget calling this in a constructor:
-    public void initKeyFlags(){
-        for(int i=0;i<255;i++)
-            keyflags[i]=false;
-    }
-    
-    public void UpdateKeyIsDown (bool IsPressed, char key){
-        if(key>=0 && key<255)//Note: sizeof(char)=2 in .NET
-            keyflags[key]=IsPressed;
-        Console.WriteLine(String.Format("Key {0} is now {1}",key,IsPressed));
-    }
-    
-    protected void OnDrawingarea1KeyPressEvent (object o, Gtk.KeyPressEventArgs args)
-    {
-        UpdateKeyIsDown(true, args.Event.Key.ToString()[0]);
-        Console.Write (args.Event.Key.ToString());
+        base.OnRenderFrame(e);
+
+        OpenGL::GL.Clear(OpenGL::ClearBufferMask.ColorBufferBit | OpenGL::ClearBufferMask.DepthBufferBit);
+
+        Matrix4 lookat = Matrix4.LookAt(0, 5, 5, 0, 0, 0, 0, 1, 0);
+        OpenGL::GL.MatrixMode(OpenGL::MatrixMode.Modelview);
+        OpenGL::GL.LoadMatrix(ref lookat);
+
+        angle += rotation_speed * (float)e.Time;
+        OpenGL::GL.Rotate(angle, 0.0f, 1.0f, 0.0f);
+
+        DrawCube();
+
+        this.SwapBuffers();
+        Thread.Sleep(1);
     }
 
-    protected void OnDrawingarea1KeyReleaseEvent (object o, Gtk.KeyReleaseEventArgs args)
+
+    private void DrawCube()
     {
-        UpdateKeyIsDown(false, args.Event.Key.ToString()[0]);
-        Console.Write (args.Event.Key.ToString());
+            OpenGL::GL.Begin(OpenGL::BeginMode.Quads);
+
+            OpenGL::GL.Color3(Color.Silver);
+            OpenGL::GL.Vertex3(-1.0f, -1.0f, -1.0f);
+            OpenGL::GL.Vertex3(-1.0f, 1.0f, -1.0f);
+            OpenGL::GL.Vertex3(1.0f, 1.0f, -1.0f);
+            OpenGL::GL.Vertex3(1.0f, -1.0f, -1.0f);
+
+            OpenGL::GL.Color3(Color.Honeydew);
+            OpenGL::GL.Vertex3(-1.0f, -1.0f, -1.0f);
+            OpenGL::GL.Vertex3(1.0f, -1.0f, -1.0f);
+            OpenGL::GL.Vertex3(1.0f, -1.0f, 1.0f);
+            OpenGL::GL.Vertex3(-1.0f, -1.0f, 1.0f);
+
+            OpenGL::GL.Color3(Color.Moccasin);
+            OpenGL::GL.Vertex3(-1.0f, -1.0f, -1.0f);
+            OpenGL::GL.Vertex3(-1.0f, -1.0f, 1.0f);
+            OpenGL::GL.Vertex3(-1.0f, 1.0f, 1.0f);
+            OpenGL::GL.Vertex3(-1.0f, 1.0f, -1.0f);
+
+            OpenGL::GL.Color3(Color.IndianRed);
+            OpenGL::GL.Vertex3(-1.0f, -1.0f, 1.0f);
+            OpenGL::GL.Vertex3(1.0f, -1.0f, 1.0f);
+            OpenGL::GL.Vertex3(1.0f, 1.0f, 1.0f);
+            OpenGL::GL.Vertex3(-1.0f, 1.0f, 1.0f);
+
+            OpenGL::GL.Color3(Color.PaleVioletRed);
+            OpenGL::GL.Vertex3(-1.0f, 1.0f, -1.0f);
+            OpenGL::GL.Vertex3(-1.0f, 1.0f, 1.0f);
+            OpenGL::GL.Vertex3(1.0f, 1.0f, 1.0f);
+            OpenGL::GL.Vertex3(1.0f, 1.0f, -1.0f);
+
+            OpenGL::GL.Color3(Color.ForestGreen);
+            OpenGL::GL.Vertex3(1.0f, -1.0f, -1.0f);
+            OpenGL::GL.Vertex3(1.0f, 1.0f, -1.0f);
+            OpenGL::GL.Vertex3(1.0f, 1.0f, 1.0f);
+            OpenGL::GL.Vertex3(1.0f, -1.0f, 1.0f);
+
+            OpenGL::GL.End();
     }
-    /*
-    Other parts of keybinding functionality:
-        this.drawing_area.KeyPressEvent += new global::Gtk.KeyPressEventHandler (this.OnDrawingarea1KeyPressEvent);
-        this.drawing_area.KeyReleaseEvent += new global::Gtk.KeyReleaseEventHandler (this.OnDrawingarea1KeyReleaseEvent);
-        //Having a drawing_area to begin with
-        public bool[] keyflags = new bool[255];
-    */
-    #endregion
 }
 
