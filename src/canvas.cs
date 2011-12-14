@@ -67,12 +67,35 @@ public class Canvas : GameWindow
         OpenGL::GL.LoadMatrix(ref lookat);
 
         angle += rotation_speed * (float)e.Time;
-        OpenGL::GL.Rotate(angle, 0.0f, 1.0f, 0.0f);
+        //OpenGL::GL.Rotate(angle, 0.0f, 1.0f, 0.0f);
 
-        DrawCube();
+        List<CoordinateEngine.RelativisticObject> ros = universe.GetNPCs();
+        lock (ros) {
+            foreach (CoordinateEngine.RelativisticObject ro in ros) {
+                DrawRelativisticObject(ro);
+            }
+        }
 
         this.SwapBuffers();
         Thread.Sleep(1);
+    }
+
+
+    private void DrawRelativisticObject(CoordinateEngine.RelativisticObject ro)
+    {
+        double x = ro.x[0];
+        double y = ro.x[1];
+        double z = ro.x[2];
+
+        double size = .2;
+
+        OpenGL::GL.Begin(OpenGL::BeginMode.Quads);
+        OpenGL::GL.Color3(Color.Silver);
+        OpenGL::GL.Vertex3(x - size, y - size, 0);
+        OpenGL::GL.Vertex3(x - size, y + size, 0);
+        OpenGL::GL.Vertex3(x + size, y + size, 0);
+        OpenGL::GL.Vertex3(x + size, y - size, 0);
+        OpenGL::GL.End();
     }
 
 

@@ -30,14 +30,28 @@ public class Rope
     public void EngineThread()
     {
         int tick = 0;
+        Random r = new Random();
         while (true) {
-            DateTime start = DateTime.Now;
             lock (objs) {
-                objs.Clear();
-                objs.Add(new CoordinateEngine.RelativisticObject(tick % 500, tick % 500, tick % 500));
+                if (tick % 60 == 0) {
+                    double new_x = r.NextDouble() * 2 - 2;
+                    double new_y = r.NextDouble() * 2 - 2;
+                    double new_z = r.NextDouble() * 2 - 2;
+                    objs.Add(new CoordinateEngine.RelativisticObject(new_x, new_y, new_z));
+                }
+
+                List<CoordinateEngine.RelativisticObject> to_remove = new List<CoordinateEngine.RelativisticObject>();
+                foreach (CoordinateEngine.RelativisticObject obj in objs) {
+                    obj.x[0] += .02;
+                    if (obj.x[0] > 3) {
+                        to_remove.Add(obj);
+                    }
+                }
+
+                foreach (CoordinateEngine.RelativisticObject obj in to_remove) {
+                    objs.Remove(obj);
+                }
             }
-            double ms_taken = (DateTime.Now - start).TotalMilliseconds;
-            Console.WriteLine(String.Format("PHYS: {0:f} ms", ms_taken));
             tick++;
             Thread.Sleep(20);
         }
