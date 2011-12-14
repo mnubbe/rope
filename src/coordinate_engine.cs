@@ -1,5 +1,6 @@
 using System;
-using System.Diagnostics; //Useful for Debug.Assert
+//using System.Diagnostics; //Useful for Debug.Assert
+//using NUnit.Framework;
 
 public static class CoordinateEngine
 {
@@ -44,7 +45,8 @@ public static class CoordinateEngine
         //TODO: must initialize t_last_update
         public RelativisticObject(double[] xin, double[]vin, double t_object_in = 0)
         {
-            Debug.Assert(xin.Length==vin.Length);
+
+            //Debug.Assert(xin.Length==vin.Length);
             x = new double[xin.Length];
             v = new double[vin.Length];
             for(int i=0;i<xin.Length;i++){
@@ -116,8 +118,8 @@ public static class CoordinateEngine
         public void updatePositionByDrifting(double requested_target_time)
         {
             double interval = requested_target_time - t_last_update;
-            Debug.Assert(requested_target_time>t_last_update || interval<0,
-            "It seems we are seeing something move back in time unexpectedly.  Did you initializeLastUpdateTime(double init_t_update) ?");
+            //Debug.Assert(requested_target_time>t_last_update || interval<0,
+            //"It seems we are seeing something move back in time unexpectedly.  Did you initializeLastUpdateTime(double init_t_update) ?");
             //update position
             for(int i=0;i<x.Length;i++)
             {
@@ -138,24 +140,24 @@ public static class CoordinateEngine
     //Returns the relative velocity of the actor from the observer's perspective
     public static double[] velocityDifference(RelativisticObject observer, RelativisticObject actor)
     {
-        Debug.Assert(observer.v.Length == actor.v.Length, "Coordinate dimensionality mismatch");
+        //Debug.Assert(observer.v.Length == actor.v.Length, "Coordinate dimensionality mismatch");
         double[] answer =  new double[observer.v.Length];
         for(int i=0;i<observer.v.Length;i++){
             answer[i]= (actor.v[i] - observer.v[i])/(1.0 -  actor.v[i] * observer.v[i]);
         }
-        Debug.Assert(RMS(answer)<=1, "Speed of light exceeded");//This should never exceed c unless we have tacheons, which can break other parts of the simulation
+        //Debug.Assert(RMS(answer)<=1, "Speed of light exceeded");//This should never exceed c unless we have tacheons, which can break other parts of the simulation
         return answer;
     }
     
     //Returns the relativistic sum of two velocities.  Does not require a RelativisticObject but likely to use RelativisticObject.v
     public static double[] velocitySum(double[] v1, double[] v2)
     {
-        Debug.Assert(v1.Length == v2.Length, "Coordinate dimensionality mismatch");
+        //Debug.Assert(v1.Length == v2.Length, "Coordinate dimensionality mismatch");
         double[] answer =  new double[v1.Length];
         for(int i=0;i<v1.Length;i++){
             answer[i]= (v1[i] + v2[i])/(1.0 +  v1[i] * v2[i]);
         }
-        Debug.Assert(RMS(answer)<=1, "Speed of light exceeded");//This should never exceed c unless we have tacheons, which will break other parts of the simulation
+        //Debug.Assert(RMS(answer)<=1, "Speed of light exceeded");//This should never exceed c unless we have tacheons, which will break other parts of the simulation
         return answer;
     }
     
@@ -194,14 +196,14 @@ public static class CoordinateEngine
     public static double computeGamma(double[] v)
     {
         double answer = 1.0-RMS(v);
-        Debug.Assert(RMS(v)<1.0, "Speed of light is exceeded on gamma calculation");
+        //Debug.Assert(RMS(v)<1.0, "Speed of light is exceeded on gamma calculation");
         answer = 1.0/Math.Sqrt(answer);//This line also will complain about vrms>1.0
         return answer;
     }
     public static double computeGamma(double vrms)
     {
         double answer = 1.0-vrms;
-        Debug.Assert(vrms<1.0, "Speed of light is exceeded on gamma calculation");
+        //Debug.Assert(vrms<1.0, "Speed of light is exceeded on gamma calculation");
         answer = 1.0/Math.Sqrt(answer);//This line also will complain about vrms>1.0
         return answer;
     }
