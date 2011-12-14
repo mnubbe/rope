@@ -10,7 +10,7 @@ BINLIBS = -r:libs/opentk/OpenTK.dll -r:libs/opentk/OpenTK.Compatibility.dll -r:l
 
 all: $(APP)
 
-$(APP):
+$(APP): $(SRCS)
 	$(CC) -debug $(LDFLAGS) $(BINLIBS) $(SRCS) -out:$(APP) $(LIBS)
 
 clean:
