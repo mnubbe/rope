@@ -1,3 +1,7 @@
+/*
+ * Canvas implements the GUI.
+ */
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -7,17 +11,17 @@ using OpenTK;
 using Graphics = OpenTK.Graphics;
 using OpenGL = OpenTK.Graphics.OpenGL;
 
+
 public class Canvas : GameWindow
 {
-    private Rope rope;
     private Universe universe;
     private float rotation_speed = 180.0f;
     private float angle;
 
 
-    public Canvas(Rope r, Universe u) : base(1920, 1080, new Graphics::GraphicsMode(16, 16))
+    /// <param name="u">A Universe to display.</param>
+    public Canvas(Universe u) : base(1920, 1080, new Graphics::GraphicsMode(16, 16))
     {
-        rope = r;
         universe = u;
     }
 
@@ -82,6 +86,14 @@ public class Canvas : GameWindow
     }
 
 
+    /// <summary>
+    /// Draw a single RelativisticObject to the screen.
+    /// </summary>
+    /// <param name="ro">The RelativisticObject to draw.</param>
+    /// <param name="issilver">Whether that object should be silver I guess</param>
+    /// <remarks>
+    /// What? You want to choose a color? Get off my lawn!
+    /// </remarks>
     private void DrawRelativisticObject (CoordinateEngine.RelativisticObject ro, bool issilver = true)
     {
         double x = ro.x [0];
@@ -100,50 +112,6 @@ public class Canvas : GameWindow
         OpenGL::GL.Vertex3 (x + size, y + size, 0);
         OpenGL::GL.Vertex3 (x + size, y - size, 0);
         OpenGL::GL.End ();
-    }
-
-
-    private void DrawCube()
-    {
-            OpenGL::GL.Begin(OpenGL::BeginMode.Quads);
-
-            OpenGL::GL.Color3(Color.Silver);
-            OpenGL::GL.Vertex3(-1.0f, -1.0f, -1.0f);
-            OpenGL::GL.Vertex3(-1.0f, 1.0f, -1.0f);
-            OpenGL::GL.Vertex3(1.0f, 1.0f, -1.0f);
-            OpenGL::GL.Vertex3(1.0f, -1.0f, -1.0f);
-
-            OpenGL::GL.Color3(Color.Honeydew);
-            OpenGL::GL.Vertex3(-1.0f, -1.0f, -1.0f);
-            OpenGL::GL.Vertex3(1.0f, -1.0f, -1.0f);
-            OpenGL::GL.Vertex3(1.0f, -1.0f, 1.0f);
-            OpenGL::GL.Vertex3(-1.0f, -1.0f, 1.0f);
-
-            OpenGL::GL.Color3(Color.Moccasin);
-            OpenGL::GL.Vertex3(-1.0f, -1.0f, -1.0f);
-            OpenGL::GL.Vertex3(-1.0f, -1.0f, 1.0f);
-            OpenGL::GL.Vertex3(-1.0f, 1.0f, 1.0f);
-            OpenGL::GL.Vertex3(-1.0f, 1.0f, -1.0f);
-
-            OpenGL::GL.Color3(Color.IndianRed);
-            OpenGL::GL.Vertex3(-1.0f, -1.0f, 1.0f);
-            OpenGL::GL.Vertex3(1.0f, -1.0f, 1.0f);
-            OpenGL::GL.Vertex3(1.0f, 1.0f, 1.0f);
-            OpenGL::GL.Vertex3(-1.0f, 1.0f, 1.0f);
-
-            OpenGL::GL.Color3(Color.PaleVioletRed);
-            OpenGL::GL.Vertex3(-1.0f, 1.0f, -1.0f);
-            OpenGL::GL.Vertex3(-1.0f, 1.0f, 1.0f);
-            OpenGL::GL.Vertex3(1.0f, 1.0f, 1.0f);
-            OpenGL::GL.Vertex3(1.0f, 1.0f, -1.0f);
-
-            OpenGL::GL.Color3(Color.ForestGreen);
-            OpenGL::GL.Vertex3(1.0f, -1.0f, -1.0f);
-            OpenGL::GL.Vertex3(1.0f, 1.0f, -1.0f);
-            OpenGL::GL.Vertex3(1.0f, 1.0f, 1.0f);
-            OpenGL::GL.Vertex3(1.0f, -1.0f, 1.0f);
-
-            OpenGL::GL.End();
     }
 }
 

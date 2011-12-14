@@ -19,7 +19,7 @@ public class Rope
         engineer = new Thread(EngineThread);
         universe = new Universe(); // Let there be light.
         objs = universe.GetNPCs();
-        canvas = new Canvas(this, universe);
+        canvas = new Canvas(universe);
         //Utilities.SetWindowTitle("rope rope rope");
 
         engineer.Start();
