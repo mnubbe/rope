@@ -15,7 +15,7 @@ public class Canvas : GameWindow
     private float angle;
 
 
-    public Canvas(Rope r, Universe u) : base(500, 500, new Graphics::GraphicsMode(16, 16))
+    public Canvas(Rope r, Universe u) : base(1920, 1080, new Graphics::GraphicsMode(16, 16))
     {
         rope = r;
         universe = u;
@@ -56,46 +56,50 @@ public class Canvas : GameWindow
     }
 
 
-    protected override void OnRenderFrame(FrameEventArgs e)
+    protected override void OnRenderFrame (FrameEventArgs e)
     {
-        base.OnRenderFrame(e);
+        base.OnRenderFrame (e);
 
-        OpenGL::GL.Clear(OpenGL::ClearBufferMask.ColorBufferBit | OpenGL::ClearBufferMask.DepthBufferBit);
+        OpenGL::GL.Clear (OpenGL::ClearBufferMask.ColorBufferBit | OpenGL::ClearBufferMask.DepthBufferBit);
 
-        Matrix4 lookat = Matrix4.LookAt(0, 5, 5, 0, 0, 0, 0, 1, 0);
-        OpenGL::GL.MatrixMode(OpenGL::MatrixMode.Modelview);
-        OpenGL::GL.LoadMatrix(ref lookat);
+        Matrix4 lookat = Matrix4.LookAt (0, 5, 5, 0, 0, 0, 0, 1, 0);
+        OpenGL::GL.MatrixMode (OpenGL::MatrixMode.Modelview);
+        OpenGL::GL.LoadMatrix (ref lookat);
 
         angle += rotation_speed * (float)e.Time;
         //OpenGL::GL.Rotate(angle, 0.0f, 1.0f, 0.0f);
 
-        List<CoordinateEngine.RelativisticObject> ros = universe.GetNPCs();
+        List<CoordinateEngine.RelativisticObject> ros = universe.GetNPCs ();
         lock (ros) {
             foreach (CoordinateEngine.RelativisticObject ro in ros) {
-                DrawRelativisticObject(ro);
+                DrawRelativisticObject (ro);
             }
         }
+        DrawRelativisticObject (universe.bro, false);
 
-        this.SwapBuffers();
-        Thread.Sleep(1);
+        this.SwapBuffers ();
+        Thread.Sleep (1);
     }
 
 
-    private void DrawRelativisticObject(CoordinateEngine.RelativisticObject ro)
+    private void DrawRelativisticObject (CoordinateEngine.RelativisticObject ro, bool issilver = true)
     {
-        double x = ro.x[0];
-        double y = ro.x[1];
-        double z = ro.x[2];
+        double x = ro.x [0];
+        double y = ro.x [1];
+        double z = ro.x [2];
 
-        double size = .2;
+        double size = .01;
 
-        OpenGL::GL.Begin(OpenGL::BeginMode.Quads);
-        OpenGL::GL.Color3(Color.Silver);
-        OpenGL::GL.Vertex3(x - size, y - size, 0);
-        OpenGL::GL.Vertex3(x - size, y + size, 0);
-        OpenGL::GL.Vertex3(x + size, y + size, 0);
-        OpenGL::GL.Vertex3(x + size, y - size, 0);
-        OpenGL::GL.End();
+        OpenGL::GL.Begin (OpenGL::BeginMode.Quads);
+        if (issilver)
+            OpenGL::GL.Color3 (Color.Silver);
+        else
+            OpenGL::GL.Color3 (Color.Blue);
+        OpenGL::GL.Vertex3 (x - size, y - size, 0);
+        OpenGL::GL.Vertex3 (x - size, y + size, 0);
+        OpenGL::GL.Vertex3 (x + size, y + size, 0);
+        OpenGL::GL.Vertex3 (x + size, y - size, 0);
+        OpenGL::GL.End ();
     }
 
 

@@ -8,7 +8,7 @@ using System.Collections.Generic;
 public class Universe
 {
     // Actors.
-    CoordinateEngine.RelativisticObject bro = new
+    public CoordinateEngine.RelativisticObject bro = new
         CoordinateEngine.RelativisticObject(0, 0, 0);
     List<CoordinateEngine.RelativisticObject> dudes = new
         List<CoordinateEngine.RelativisticObject>();
@@ -37,7 +37,7 @@ public class Universe
     {
         for (int i=0; i<4; i++) {
             for (int j=0; j<4; j++) {
-                dudes.Add (new CoordinateEngine.RelativisticObject (i * .100 + .050, j * .1, 0));
+                dudes.Add (new CoordinateEngine.RelativisticObject (i * 4*.100 + 4*.050, 4*j * .1, 0));
             }
         }
     }
@@ -52,8 +52,8 @@ public class Universe
             for (int j=0; j<4; j++) {
                 dude = dudes [j + 4 * i];
                 mytime = dude.observedUniverseTime (universe_time, bro);
-                dude.x [0] = .050 * Math.Cos (mytime * Math.PI * 2) + i * .1;
-                dude.x [1] = .050 * Math.Sin (mytime * Math.PI * 2) + j * .1;
+                dude.x [0] = 1 * Math.Cos (mytime * 1.2) + 4*i * .1;
+                dude.x [1] = 1 * Math.Sin (mytime * 1.2) + 4*j * .1;
                 //dude.t_last_update = dude.observedUniverseTime (universe_time, bro);
                 //dudes[j+4*i].x[0] = 100*Math.Sin(
                 dude.t_last_update = mytime;
