@@ -143,14 +143,14 @@ public static class CoordinateEngine
     //Returns the relative velocity of the actor from the observer's perspective
     public static double[] velocityDifference(RelativisticObject observer, RelativisticObject actor)
     {
-        throw new NotImplementedException("Implemented incorrectly, need to fix");
         //Debug.Assert(observer.v.Length == actor.v.Length, "Coordinate dimensionality mismatch");
-        double[] answer =  new double[observer.v.Length];
-        for(int i=0;i<observer.v.Length;i++){
-            answer[i]= (actor.v[i] - observer.v[i])/(1.0 -  actor.v[i] * observer.v[i]);
+        //stupidly short way to implement:
+        double[] negative_actor_v = new double[actor.v.Length];
+        for(int i=0;i<actor.v.Length;i++){
+            negative_actor_v[i] = -actor.v[i];
         }
         //Debug.Assert(RMS(answer)<=1, "Speed of light exceeded");//This should never exceed c unless we have tacheons, which can break other parts of the simulation
-        return answer;
+        return velocitySum(observer.v,negative_actor_v);
     }
     
     //Returns the relativistic sum of two velocities (adding v2 onto v1).  Does not require a RelativisticObject but likely to use RelativisticObject.v.
@@ -159,8 +159,9 @@ public static class CoordinateEngine
     //Reference: http://en.wikipedia.org/wiki/Velocity-addition_formula
     public static double[] velocitySum(double[] v1, double[] v2)
     {
-        if(v1.Length!=v2.Length)
+        if(v1.Length!=v2.Length){
             throw new IndexOutOfRangeException("Array inputs do not match in dimension");
+        }
         //Debug.Assert(v1.Length == v2.Length, "Coordinate dimensionality mismatch");
         double[] answer =  new double[v1.Length];
         double dot_product = dotProduct(v1,v2);
@@ -168,27 +169,12 @@ public static class CoordinateEngine
         for(int i=0;i<v1.Length;i++){
             answer[i] = v1[i]+v2[i]/v1_gamma+dot_product*v1[i]*v1_gamma/(1+v1_gamma);
             answer[i] /= (1+dot_product);
-            //answer[i]= (v1[i] + v2[i])/(1.0 +  v1[i] * v2[i]);//No even more complicated
         }
         //Debug.Assert(RMS(answer)<=1, "Speed of light exceeded");//This should never exceed c unless we have tacheons, which will break other parts of the simulation
         return answer;
     }
 
-    /// <summary>
-    /// Returns the dot product of input arrays a and b
-    /// </summary>
-    /// <returns>
-    /// Dot product.
-    /// </returns>
-    /// <param name='a'>
-    /// array a
-    /// </param>
-    /// <param name='b'>
-    /// array b
-    /// </param>
-    /// <exception cref='IndexOutOfRangeException'>
-    /// Is thrown when an the input velocities are of different dimensionality
-    /// </exception>
+    //Returns the dot product of a and b (think vectors)
     public static double dotProduct(double[] a, double[] b){
         if(a.Length!=b.Length)
             throw new IndexOutOfRangeException("Array inputs do not match in dimension");
