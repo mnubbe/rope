@@ -15,14 +15,14 @@ using OpenGL = OpenTK.Graphics.OpenGL;
 public class Canvas : GameWindow
 {
     // Indices.
-    private const int x = 0;
-    private const int y = 1;
-    private const int z = 2;
+    private const int _x = 0;
+    private const int _y = 1;
+    private const int _z = 2;
 
     private Universe universe;
     private float rotation_speed = 90.0f;
-    private float angle;
-    private double[] rotate = {0.0f, 0.0f, 0.0f};
+    private float angle = 0.0f;
+    private float[] rotate = {0.0f, 0.0f, 0.0f};
 
 
     /// <param name="u">A Universe to display.</param>
@@ -75,21 +75,16 @@ public class Canvas : GameWindow
         }
 
         // Camera movement.
+        bool rotating = false;
         if (Keyboard[OpenTK.Input.Key.Right]) {
+            rotating = true;
             angle += rotation_speed * (float)e.Time;
-            rotate[y] = 1.0;
+            rotate[_y] = 1.0f;
         }
         if (Keyboard[OpenTK.Input.Key.Left]) {
+            rotating = true;
             angle -= rotation_speed * (float)e.Time;
-            rotate[y] = 1.0;
-        }
-        if (Keyboard[OpenTK.Input.Key.Up]) {
-            angle -= rotation_speed * (float)e.Time;
-            rotate[x] = 1.0;
-        }
-        if (Keyboard[OpenTK.Input.Key.Down]) {
-            angle -= rotation_speed * (float)e.Time;
-            rotate[x] = 1.0;
+            rotate[_y] = 1.0f;
         }
 
         universe.bro.updateGamma();
@@ -109,8 +104,8 @@ public class Canvas : GameWindow
         Matrix4 lookat = Matrix4.LookAt (0, 5, 5, 0, 0, 0, 0, 1, 0);
         OpenGL::GL.MatrixMode(OpenGL::MatrixMode.Modelview);
         OpenGL::GL.LoadMatrix(ref lookat);
-        OpenGL::GL.Rotate(angle, rotate[x], rotate[y], rotate[z]);
-        rotate = new double[3]{0.0f, 0.0f, 0.0f};
+        OpenGL::GL.Rotate(angle, rotate[_x], rotate[_y], rotate[_z]);
+        Console.WriteLine(String.Format("{0} @ {1}, {2}, {3}", angle, rotate[_x], rotate[_y], rotate[_z]));
 
         List<CoordinateEngine.RelativisticObject> ros = universe.GetNPCs ();
         lock (ros) {
@@ -133,24 +128,57 @@ public class Canvas : GameWindow
     /// <remarks>
     /// What? You want to choose a color? Get off my lawn!
     /// </remarks>
-    private void DrawRelativisticObject (CoordinateEngine.RelativisticObject ro, bool issilver = true)
+    private void DrawRelativisticObject(CoordinateEngine.RelativisticObject ro, bool issilver = true)
     {
-        double x = ro.x [0];
-        double y = ro.x [1];
-        double z = ro.x [2];
+        double x = ro.x[_x];
+        double y = ro.x[_y];
+        double z = ro.x[_z];
 
-        double size = .01;
+        double size = .1;
 
-        OpenGL::GL.Begin (OpenGL::BeginMode.Quads);
+        OpenGL::GL.Begin(OpenGL::BeginMode.Quads);
         if (issilver)
-            OpenGL::GL.Color3 (Color.Silver);
+            OpenGL::GL.Color3(Color.Silver);
         else
-            OpenGL::GL.Color3 (Color.Blue);
-        OpenGL::GL.Vertex3 (x - size, y - size, 0);
-        OpenGL::GL.Vertex3 (x - size, y + size, 0);
-        OpenGL::GL.Vertex3 (x + size, y + size, 0);
-        OpenGL::GL.Vertex3 (x + size, y - size, 0);
-        OpenGL::GL.End ();
+            OpenGL::GL.Color3(Color.Blue);
+
+        // front
+        OpenGL::GL.Vertex3(x - size, y - size, z + size);
+        OpenGL::GL.Vertex3(x - size, y + size, z + size);
+        OpenGL::GL.Vertex3(x + size, y + size, z + size);
+        OpenGL::GL.Vertex3(x + size, y - size, z + size);
+
+        // right
+        OpenGL::GL.Vertex3(x + size, y - size, z + size);
+        OpenGL::GL.Vertex3(x + size, y + size, z + size);
+        OpenGL::GL.Vertex3(x + size, y + size, z - size);
+        OpenGL::GL.Vertex3(x + size, y - size, z - size);
+
+        // bottom
+        OpenGL::GL.Vertex3(x + size, y - size, z - size);
+        OpenGL::GL.Vertex3(x + size, y - size, z + size);
+        OpenGL::GL.Vertex3(x - size, y - size, z + size);
+        OpenGL::GL.Vertex3(x - size, y - size, z - size);
+
+        // left
+        OpenGL::GL.Vertex3(x - size, y - size, z - size);
+        OpenGL::GL.Vertex3(x - size, y - size, z + size);
+        OpenGL::GL.Vertex3(x - size, y + size, z + size);
+        OpenGL::GL.Vertex3(x - size, y + size, z - size);
+
+        // top
+        OpenGL::GL.Vertex3(x - size, y + size, z - size);
+        OpenGL::GL.Vertex3(x - size, y + size, z + size);
+        OpenGL::GL.Vertex3(x + size, y + size, z + size);
+        OpenGL::GL.Vertex3(x + size, y + size, z - size);
+
+        // back
+        OpenGL::GL.Vertex3(x + size, y + size, z - size);
+        OpenGL::GL.Vertex3(x + size, y - size, z - size);
+        OpenGL::GL.Vertex3(x - size, y - size, z - size);
+        OpenGL::GL.Vertex3(x - size, y + size, z - size);
+
+        OpenGL::GL.End();
     }
 }
 
