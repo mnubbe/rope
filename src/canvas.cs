@@ -14,9 +14,15 @@ using OpenGL = OpenTK.Graphics.OpenGL;
 
 public class Canvas : GameWindow
 {
+    // Indices.
+    private const int x = 0;
+    private const int y = 1;
+    private const int z = 2;
+
     private Universe universe;
-    private float rotation_speed = 180.0f;
+    private float rotation_speed = 90.0f;
     private float angle;
+    private double[] rotate = {0.0f, 0.0f, 0.0f};
 
 
     /// <param name="u">A Universe to display.</param>
@@ -53,40 +59,58 @@ public class Canvas : GameWindow
     {
         base.OnUpdateFrame(e);
 
-        if(Keyboard[OpenTK.Input.Key.W])
-//            universe.bro.x[1]+=0.1;
-            universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,new double[3] {0,.1,0});
-        if(Keyboard[OpenTK.Input.Key.A])
-//            universe.bro.x[0]-=0.1;
-            universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,new double[3] {-.1,0,0});
-        if(Keyboard[OpenTK.Input.Key.S])
-//            universe.bro.x[1]-=0.1;
-            universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,new double[3] {0,-.1,0});
-        if(Keyboard[OpenTK.Input.Key.D])
-//            universe.bro.x[0]+=0.1;
-            universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,new double[3] {+.1,0,0});
+        // Handle input.
+        // Bro movement.
+        if (Keyboard[OpenTK.Input.Key.W]) {
+            universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,new double[3]{0,.1,0});
+        }
+        if (Keyboard[OpenTK.Input.Key.A]) {
+            universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,new double[3]{-.1,0,0});
+        }
+        if (Keyboard[OpenTK.Input.Key.S]) {
+            universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,new double[3]{0,-.1,0});
+        }
+        if (Keyboard[OpenTK.Input.Key.D]) {
+            universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,new double[3]{.1,0,0});
+        }
+
+        // Camera movement.
+        if (Keyboard[OpenTK.Input.Key.Right]) {
+            angle += rotation_speed * (float)e.Time;
+            rotate[y] = 1.0;
+        }
+        if (Keyboard[OpenTK.Input.Key.Left]) {
+            angle -= rotation_speed * (float)e.Time;
+            rotate[y] = 1.0;
+        }
+        if (Keyboard[OpenTK.Input.Key.Up]) {
+            angle -= rotation_speed * (float)e.Time;
+            rotate[x] = 1.0;
+        }
+        if (Keyboard[OpenTK.Input.Key.Down]) {
+            angle -= rotation_speed * (float)e.Time;
+            rotate[x] = 1.0;
+        }
+
         universe.bro.updateGamma();
         if (Keyboard[OpenTK.Input.Key.Escape]) {
             this.Exit();
             return;
         }
-
-
     }
 
 
     protected override void OnRenderFrame (FrameEventArgs e)
     {
-        base.OnRenderFrame (e);
+        base.OnRenderFrame(e);
 
-        OpenGL::GL.Clear (OpenGL::ClearBufferMask.ColorBufferBit | OpenGL::ClearBufferMask.DepthBufferBit);
+        OpenGL::GL.Clear(OpenGL::ClearBufferMask.ColorBufferBit | OpenGL::ClearBufferMask.DepthBufferBit);
 
         Matrix4 lookat = Matrix4.LookAt (0, 5, 5, 0, 0, 0, 0, 1, 0);
-        OpenGL::GL.MatrixMode (OpenGL::MatrixMode.Modelview);
-        OpenGL::GL.LoadMatrix (ref lookat);
-
-        angle += rotation_speed * (float)e.Time;
-        //OpenGL::GL.Rotate(angle, 0.0f, 1.0f, 0.0f);
+        OpenGL::GL.MatrixMode(OpenGL::MatrixMode.Modelview);
+        OpenGL::GL.LoadMatrix(ref lookat);
+        OpenGL::GL.Rotate(angle, rotate[x], rotate[y], rotate[z]);
+        rotate = new double[3]{0.0f, 0.0f, 0.0f};
 
         List<CoordinateEngine.RelativisticObject> ros = universe.GetNPCs ();
         lock (ros) {
@@ -94,10 +118,10 @@ public class Canvas : GameWindow
                 DrawRelativisticObject (ro);
             }
         }
-        DrawRelativisticObject (universe.bro, false);
+        DrawRelativisticObject(universe.bro, false);
 
-        this.SwapBuffers ();
-        Thread.Sleep (1);
+        this.SwapBuffers();
+        Thread.Sleep(1);
     }
 
 
