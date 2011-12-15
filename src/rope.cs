@@ -34,7 +34,8 @@ public class Rope
         while (true) {
             lock (objs) {
                 universe.UpdateDudes ();
-                universe.universe_time += 0.020;
+                universe.UpdateBro();
+                universe.universe_time += 0.020*universe.bro.gamma;
 
                 if (tick % 60 == 0) {
                     double new_x = r.NextDouble() * 2 - 2;

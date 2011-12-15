@@ -45,14 +45,29 @@ public class Canvas : GameWindow
     }
 
 
-    protected override void OnUpdateFrame(FrameEventArgs e)
+    protected override void OnUpdateFrame (FrameEventArgs e)
     {
         base.OnUpdateFrame(e);
 
+        if(Keyboard[OpenTK.Input.Key.W])
+//            universe.bro.x[1]+=0.1;
+            universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,new double[3] {0,.1,0});
+        if(Keyboard[OpenTK.Input.Key.A])
+//            universe.bro.x[0]-=0.1;
+            universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,new double[3] {-.1,0,0});
+        if(Keyboard[OpenTK.Input.Key.S])
+//            universe.bro.x[1]-=0.1;
+            universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,new double[3] {0,-.1,0});
+        if(Keyboard[OpenTK.Input.Key.D])
+//            universe.bro.x[0]+=0.1;
+            universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,new double[3] {+.1,0,0});
+        universe.bro.updateGamma();
         if (Keyboard[OpenTK.Input.Key.Escape]) {
             this.Exit();
             return;
         }
+
+
     }
 
 
@@ -105,45 +120,46 @@ public class Canvas : GameWindow
 
     private void DrawCube()
     {
-            OpenGL::GL.Begin(OpenGL::BeginMode.Quads);
+        OpenGL::GL.Begin(OpenGL::BeginMode.Quads);
 
-            OpenGL::GL.Color3(Color.Silver);
-            OpenGL::GL.Vertex3(-1.0f, -1.0f, -1.0f);
-            OpenGL::GL.Vertex3(-1.0f, 1.0f, -1.0f);
-            OpenGL::GL.Vertex3(1.0f, 1.0f, -1.0f);
-            OpenGL::GL.Vertex3(1.0f, -1.0f, -1.0f);
+        OpenGL::GL.Color3(Color.Silver);
+        OpenGL::GL.Vertex3(-1.0f, -1.0f, -1.0f);
+        OpenGL::GL.Vertex3(-1.0f, 1.0f, -1.0f);
+        OpenGL::GL.Vertex3(1.0f, 1.0f, -1.0f);
+        OpenGL::GL.Vertex3(1.0f, -1.0f, -1.0f);
 
-            OpenGL::GL.Color3(Color.Honeydew);
-            OpenGL::GL.Vertex3(-1.0f, -1.0f, -1.0f);
-            OpenGL::GL.Vertex3(1.0f, -1.0f, -1.0f);
-            OpenGL::GL.Vertex3(1.0f, -1.0f, 1.0f);
-            OpenGL::GL.Vertex3(-1.0f, -1.0f, 1.0f);
+        OpenGL::GL.Color3(Color.Honeydew);
+        OpenGL::GL.Vertex3(-1.0f, -1.0f, -1.0f);
+        OpenGL::GL.Vertex3(1.0f, -1.0f, -1.0f);
+        OpenGL::GL.Vertex3(1.0f, -1.0f, 1.0f);
+        OpenGL::GL.Vertex3(-1.0f, -1.0f, 1.0f);
 
-            OpenGL::GL.Color3(Color.Moccasin);
-            OpenGL::GL.Vertex3(-1.0f, -1.0f, -1.0f);
-            OpenGL::GL.Vertex3(-1.0f, -1.0f, 1.0f);
-            OpenGL::GL.Vertex3(-1.0f, 1.0f, 1.0f);
-            OpenGL::GL.Vertex3(-1.0f, 1.0f, -1.0f);
+        OpenGL::GL.Color3(Color.Moccasin);
+        OpenGL::GL.Vertex3(-1.0f, -1.0f, -1.0f);
+        OpenGL::GL.Vertex3(-1.0f, -1.0f, 1.0f);
+        OpenGL::GL.Vertex3(-1.0f, 1.0f, 1.0f);
+        OpenGL::GL.Vertex3(-1.0f, 1.0f, -1.0f);
 
-            OpenGL::GL.Color3(Color.IndianRed);
-            OpenGL::GL.Vertex3(-1.0f, -1.0f, 1.0f);
-            OpenGL::GL.Vertex3(1.0f, -1.0f, 1.0f);
-            OpenGL::GL.Vertex3(1.0f, 1.0f, 1.0f);
-            OpenGL::GL.Vertex3(-1.0f, 1.0f, 1.0f);
+        OpenGL::GL.Color3(Color.IndianRed);
+        OpenGL::GL.Vertex3(-1.0f, -1.0f, 1.0f);
+        OpenGL::GL.Vertex3(1.0f, -1.0f, 1.0f);
+        OpenGL::GL.Vertex3(1.0f, 1.0f, 1.0f);
+        OpenGL::GL.Vertex3(-1.0f, 1.0f, 1.0f);
 
-            OpenGL::GL.Color3(Color.PaleVioletRed);
-            OpenGL::GL.Vertex3(-1.0f, 1.0f, -1.0f);
-            OpenGL::GL.Vertex3(-1.0f, 1.0f, 1.0f);
-            OpenGL::GL.Vertex3(1.0f, 1.0f, 1.0f);
-            OpenGL::GL.Vertex3(1.0f, 1.0f, -1.0f);
+        OpenGL::GL.Color3(Color.PaleVioletRed);
+        OpenGL::GL.Vertex3(-1.0f, 1.0f, -1.0f);
+        OpenGL::GL.Vertex3(-1.0f, 1.0f, 1.0f);
+        OpenGL::GL.Vertex3(1.0f, 1.0f, 1.0f);
+        OpenGL::GL.Vertex3(1.0f, 1.0f, -1.0f);
 
-            OpenGL::GL.Color3(Color.ForestGreen);
-            OpenGL::GL.Vertex3(1.0f, -1.0f, -1.0f);
-            OpenGL::GL.Vertex3(1.0f, 1.0f, -1.0f);
-            OpenGL::GL.Vertex3(1.0f, 1.0f, 1.0f);
-            OpenGL::GL.Vertex3(1.0f, -1.0f, 1.0f);
+        OpenGL::GL.Color3(Color.ForestGreen);
+        OpenGL::GL.Vertex3(1.0f, -1.0f, -1.0f);
+        OpenGL::GL.Vertex3(1.0f, 1.0f, -1.0f);
+        OpenGL::GL.Vertex3(1.0f, 1.0f, 1.0f);
+        OpenGL::GL.Vertex3(1.0f, -1.0f, 1.0f);
 
-            OpenGL::GL.End();
+        OpenGL::GL.End();
+
     }
 }
 

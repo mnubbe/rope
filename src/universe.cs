@@ -24,6 +24,7 @@ public class Universe
     {
         universe_time = 0;
         InitDemo ();
+        bro.updateGamma();
     }
 
     public List<CoordinateEngine.RelativisticObject> GetNPCs()
@@ -60,6 +61,12 @@ public class Universe
             }
         }
         //Console.WriteLine ("{0},{1},{2}", dudes [1].x [0], dudes [1].x [1], dudes [1].t_last_update);
+    }
+
+    public void UpdateBro()
+    {
+        bro.updateGamma();
+        bro.updatePositionByDrifting(universe_time);
     }
 }
 

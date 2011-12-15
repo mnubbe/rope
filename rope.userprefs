@@ -1,18 +1,20 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="src/canvas.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="src/universe.cs">
     <Files>
-      <File FileName="src/canvas.cs" Line="3" Column="14" />
+      <File FileName="src/canvas.cs" Line="94" Column="22" />
       <File FileName="src/coordinate_engine.cs" Line="1" Column="1" />
       <File FileName="src/rope.cs" Line="1" Column="1" />
-      <File FileName="src/universe.cs" Line="55" Column="32" />
+      <File FileName="src/universe.cs" Line="56" Column="56" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State expanded="True">
           <Node name="rope" expanded="True">
-            <Node name="References" expanded="True" selected="True" />
-            <Node name="src" expanded="True" />
+            <Node name="References" expanded="True" />
+            <Node name="src" expanded="True">
+              <Node name="universe.cs" selected="True" />
+            </Node>
           </Node>
         </State>
       </Pad>
