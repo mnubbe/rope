@@ -105,7 +105,6 @@ public class Canvas : GameWindow
         OpenGL::GL.MatrixMode(OpenGL::MatrixMode.Modelview);
         OpenGL::GL.LoadMatrix(ref lookat);
         OpenGL::GL.Rotate(angle, rotate[_x], rotate[_y], rotate[_z]);
-        Console.WriteLine(String.Format("{0} @ {1}, {2}, {3}", angle, rotate[_x], rotate[_y], rotate[_z]));
 
         List<CoordinateEngine.RelativisticObject> ros = universe.GetNPCs ();
         lock (ros) {
