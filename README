@@ -1,3 +1,14 @@
 ROPE (Relativistic Oriented Physics Engine) is an attempt to convey the effects of relativistic acceleration and travel for a camera at short distances.  More concisely, if you could accelerate to 0.9c, what do you see differently than what you might expect?
 
 Status: 2D - non-interactive demo created, otherwise early development
+
+
+
+Keys:
+W/S: move camera forwards/backwards
+A/D: move camera left/right
+E/C: move camera up/down
+
+Up/Down (arrow) OR 8/2 (numpad): rotate camera down/up (yea inverted flight controls)
+Left/Right (arrow) OR 4/6 (numpad): rotate camera left/right
+Home/PageUp OR 7/9 (numpad): roll camera CW/CCW (aka left/right roll)
