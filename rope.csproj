@@ -23,6 +23,7 @@
     <Compile Include="src\coordinate_engine.cs" />
     <Compile Include="src\rope.cs" />
     <Compile Include="src\universe.cs" />
+    <Compile Include="src\camera.cs" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>

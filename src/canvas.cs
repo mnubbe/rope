@@ -20,19 +20,14 @@ public class Canvas : GameWindow
     private const int _z = 2;
 
     private Universe universe;
-    private float rotation_speed = 90.0f;
-    private float angle = 0.0f;
-    private Vector3 camera_position = new Vector3 (0,0,5);
-    private Vector3 lookat_vector =  new Vector3 (0,0,-1);
-    private Vector3 orientation_vector = new Vector3 (0,1,0);
-    private Vector3 left_vector = new Vector3 (1,0,0);//Points left by orientation cross lookat
-    private float movement_speed = 0.1f;
+    private rope.camera m_camera;
 
 
     /// <param name="u">A Universe to display.</param>
     public Canvas(Universe u) : base(1920, 1080, new Graphics::GraphicsMode(16, 16))
     {
         universe = u;
+        m_camera = new rope.camera();
     }
 
 
@@ -78,56 +73,50 @@ public class Canvas : GameWindow
             universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,new double[3]{.1,0,0});
         }*/
 
-        // Camera movement.
+        // Camera lateral movement
         if (Keyboard[OpenTK.Input.Key.W]) {
-            camera_position = Vector3.Add(camera_position,Vector3.Multiply(lookat_vector,movement_speed));
+            m_camera.Fly((float)e.Time,0,0);
         }
         if (Keyboard[OpenTK.Input.Key.A]) {
-            camera_position = Vector3.Add(camera_position,Vector3.Multiply(left_vector,movement_speed));
+            m_camera.Fly(0,0,(float)e.Time);
         }
         if (Keyboard[OpenTK.Input.Key.S]) {
-            camera_position = Vector3.Add(camera_position,Vector3.Multiply(lookat_vector,-movement_speed));
+            m_camera.Fly(-(float)e.Time,0,0);
         }
         if (Keyboard[OpenTK.Input.Key.D]) {
-            camera_position = Vector3.Add(camera_position,Vector3.Multiply(left_vector,-movement_speed));
+            m_camera.Fly(0,0,-(float)e.Time);
         }
         if (Keyboard[OpenTK.Input.Key.E]) {
-            camera_position = Vector3.Add(camera_position,Vector3.Multiply(orientation_vector,movement_speed));
+            m_camera.Fly(0,(float)e.Time,0);
         }
         if (Keyboard[OpenTK.Input.Key.C]) {
-            camera_position = Vector3.Add(camera_position,Vector3.Multiply(orientation_vector,-movement_speed));
+            m_camera.Fly(0,-(float)e.Time,0);
         }
 
 
-
-        angle = rotation_speed * (float)e.Time*(float)Math.PI/180.0f;
+        //Camera rotation
+        //angle = rotation_speed * (float)e.Time*(float)Math.PI/180.0f;
         //Will work for small angles, deviating at larger ones
-        if (Keyboard[OpenTK.Input.Key.Right]) {
-            lookat_vector = Vector3.Add(lookat_vector,Vector3.Multiply(left_vector,-angle));
-            //orientation_vector = Vector3.sum(orientation_vector,Vector3.Multiply(left_vector,-angle));
+        if (Keyboard[OpenTK.Input.Key.Right]||Keyboard[OpenTK.Input.Key.Keypad6]) {
+            m_camera.ShiftDirection(0,-(float)e.Time,0);
         }
-        if (Keyboard[OpenTK.Input.Key.Left]) {
-            lookat_vector = Vector3.Add(lookat_vector,Vector3.Multiply(left_vector,angle));
-            //orientation_vector = Vector3.sum(orientation_vector,Vector3.Multiply(left_vector,-angle));
+        if (Keyboard[OpenTK.Input.Key.Left]||Keyboard[OpenTK.Input.Key.Keypad4]) {
+            m_camera.ShiftDirection(0,(float)e.Time,0);
         }
-        if (Keyboard[OpenTK.Input.Key.Down]) {//up, I wanted inverted controls for testing
-            lookat_vector = Vector3.Add(lookat_vector,Vector3.Multiply(orientation_vector,angle));
-            orientation_vector = Vector3.Add(orientation_vector,Vector3.Multiply(lookat_vector,-angle));
+        if (Keyboard[OpenTK.Input.Key.Down]||Keyboard[OpenTK.Input.Key.Keypad2]) {//up, I wanted inverted controls for testing
+            m_camera.ShiftDirection((float)e.Time,0,0);
         }
-        if (Keyboard[OpenTK.Input.Key.Up]) {//down, I wanted inverted controls for testing
-            lookat_vector = Vector3.Add(lookat_vector,Vector3.Multiply(orientation_vector,-angle));
-            orientation_vector = Vector3.Add(orientation_vector,Vector3.Multiply(lookat_vector,angle));
+        if (Keyboard[OpenTK.Input.Key.Up]||Keyboard[OpenTK.Input.Key.Keypad8]) {//down, I wanted inverted controls for testing
+            m_camera.ShiftDirection(-(float)e.Time,0,0);
         }
-        //Could also include a roll which only changes orientation vector by left_vector
-//        if(rotating){
-//            angle = rotation_speed * (float)e.Time*Math.PI/180.0f;
-//        }else{
-//            angle = 0.0f;
-//        }
-        lookat_vector.Normalize();
-        orientation_vector.Normalize();
-        left_vector = Vector3.Cross(orientation_vector,lookat_vector);
-        orientation_vector = Vector3.Cross(lookat_vector,left_vector);
+        if (Keyboard[OpenTK.Input.Key.Home]||Keyboard[OpenTK.Input.Key.Keypad7]) {//Roll left
+            m_camera.ShiftDirection(0,0,(float)e.Time);
+        }
+        if (Keyboard[OpenTK.Input.Key.PageUp]||Keyboard[OpenTK.Input.Key.Keypad9]) {//Roll right
+            m_camera.ShiftDirection(0,0,-(float)e.Time);
+        }
+
+        m_camera.NormalizeDirection();//Should be called every time direction is messed with
 
         universe.bro.updateGamma();
         if (Keyboard[OpenTK.Input.Key.Escape]) {
@@ -139,12 +128,6 @@ public class Canvas : GameWindow
 
     protected override void OnRenderFrame (FrameEventArgs e)
     {
-        Matrix4 local_look_at = Matrix4.LookAt(
-            camera_position,
-            Vector3.Add(camera_position,lookat_vector),
-            //Vector3.Add(camera_position,orientation_vector)
-            orientation_vector
-            );
         base.OnRenderFrame(e);
 
         OpenGL::GL.Clear(OpenGL::ClearBufferMask.ColorBufferBit | OpenGL::ClearBufferMask.DepthBufferBit);
@@ -152,9 +135,9 @@ public class Canvas : GameWindow
         //Matrix4 lookat = Matrix4.LookAt (0, 5, 5, 0, 0, 0, 0, 1, 0);
         OpenGL::GL.MatrixMode(OpenGL::MatrixMode.Modelview);
 
+        m_camera.UpdateCameraView();
         //lookat.Rotate(Quaternion.FromAxisAngle(new Vector3(rotate[_x], rotate[_y], rotate[_z]),angle));
 
-        OpenGL::GL.LoadMatrix(ref local_look_at);
         //OpenGL::GL.Rotate(angle, rotate[_x], rotate[_y], rotate[_z]);
         //Console.WriteLine(String.Format("{0} @ {1}, {2}, {3}", angle, rotate[_x], rotate[_y], rotate[_z]));
         List<CoordinateEngine.RelativisticObject> ros = universe.GetNPCs ();
