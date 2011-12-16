@@ -12,6 +12,7 @@ namespace rope
     {
         //Constants
         const float default_rotation_speed = 1.0f;
+        const float roll_speedup_factor    = 2.0f; //roll will happen this factor faster for palatability
         const float default_movement_speed = 1.0f;
 
         //Variables
@@ -31,6 +32,15 @@ namespace rope
 
         public camera ()
         {
+            UpdateCameraView();
+        }
+        public camera (Vector3 initial_position, Vector3 initial_view_vector, Vector3 initial_orientation_vector)
+        {
+            //See above for what these are
+            camera_position    = new Vector3(initial_position);
+            lookat_vector      = new Vector3(initial_view_vector);
+            orientation_vector = new Vector3(initial_orientation_vector);
+            NormalizeDirection();
             UpdateCameraView();
         }
 
@@ -64,7 +74,7 @@ namespace rope
             }
             if (roll_left!=0.0f) {
                 //lookat_vector does not change
-                orientation_vector = Vector3.Add(orientation_vector,Vector3.Multiply(left_vector,rotation_speed*roll_left));
+                orientation_vector = Vector3.Add(orientation_vector,Vector3.Multiply(left_vector,rotation_speed*roll_left*roll_speedup_factor));
                 //left_vector goes downward
             }
         }
