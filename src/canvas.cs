@@ -22,7 +22,11 @@ public class Canvas : GameWindow
     private Universe universe;
     private float rotation_speed = 90.0f;
     private float angle = 0.0f;
-    private float[] rotate = {0.0f, 0.0f, 0.0f};
+    private Vector3 camera_position = new Vector3 (0,0,5);
+    private Vector3 lookat_vector =  new Vector3 (0,0,-1);
+    private Vector3 orientation_vector = new Vector3 (0,1,0);
+    private Vector3 left_vector = new Vector3 (1,0,0);//Points left by orientation cross lookat
+    private float movement_speed = 0.1f;
 
 
     /// <param name="u">A Universe to display.</param>
@@ -60,7 +64,7 @@ public class Canvas : GameWindow
         base.OnUpdateFrame(e);
 
         // Handle input.
-        // Bro movement.
+        /*// Bro movement.
         if (Keyboard[OpenTK.Input.Key.W]) {
             universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,new double[3]{0,.1,0});
         }
@@ -72,20 +76,58 @@ public class Canvas : GameWindow
         }
         if (Keyboard[OpenTK.Input.Key.D]) {
             universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,new double[3]{.1,0,0});
-        }
+        }*/
 
         // Camera movement.
-        bool rotating = false;
+        if (Keyboard[OpenTK.Input.Key.W]) {
+            camera_position = Vector3.Add(camera_position,Vector3.Multiply(lookat_vector,movement_speed));
+        }
+        if (Keyboard[OpenTK.Input.Key.A]) {
+            camera_position = Vector3.Add(camera_position,Vector3.Multiply(left_vector,movement_speed));
+        }
+        if (Keyboard[OpenTK.Input.Key.S]) {
+            camera_position = Vector3.Add(camera_position,Vector3.Multiply(lookat_vector,-movement_speed));
+        }
+        if (Keyboard[OpenTK.Input.Key.D]) {
+            camera_position = Vector3.Add(camera_position,Vector3.Multiply(left_vector,-movement_speed));
+        }
+        if (Keyboard[OpenTK.Input.Key.E]) {
+            camera_position = Vector3.Add(camera_position,Vector3.Multiply(orientation_vector,movement_speed));
+        }
+        if (Keyboard[OpenTK.Input.Key.C]) {
+            camera_position = Vector3.Add(camera_position,Vector3.Multiply(orientation_vector,-movement_speed));
+        }
+
+
+
+        angle = rotation_speed * (float)e.Time*(float)Math.PI/180.0f;
+        //Will work for small angles, deviating at larger ones
         if (Keyboard[OpenTK.Input.Key.Right]) {
-            rotating = true;
-            angle += rotation_speed * (float)e.Time;
-            rotate[_y] = 1.0f;
+            lookat_vector = Vector3.Add(lookat_vector,Vector3.Multiply(left_vector,-angle));
+            //orientation_vector = Vector3.sum(orientation_vector,Vector3.Multiply(left_vector,-angle));
         }
         if (Keyboard[OpenTK.Input.Key.Left]) {
-            rotating = true;
-            angle -= rotation_speed * (float)e.Time;
-            rotate[_y] = 1.0f;
+            lookat_vector = Vector3.Add(lookat_vector,Vector3.Multiply(left_vector,angle));
+            //orientation_vector = Vector3.sum(orientation_vector,Vector3.Multiply(left_vector,-angle));
         }
+        if (Keyboard[OpenTK.Input.Key.Down]) {//up, I wanted inverted controls for testing
+            lookat_vector = Vector3.Add(lookat_vector,Vector3.Multiply(orientation_vector,angle));
+            orientation_vector = Vector3.Add(orientation_vector,Vector3.Multiply(lookat_vector,-angle));
+        }
+        if (Keyboard[OpenTK.Input.Key.Up]) {//down, I wanted inverted controls for testing
+            lookat_vector = Vector3.Add(lookat_vector,Vector3.Multiply(orientation_vector,-angle));
+            orientation_vector = Vector3.Add(orientation_vector,Vector3.Multiply(lookat_vector,angle));
+        }
+        //Could also include a roll which only changes orientation vector by left_vector
+//        if(rotating){
+//            angle = rotation_speed * (float)e.Time*Math.PI/180.0f;
+//        }else{
+//            angle = 0.0f;
+//        }
+        lookat_vector.Normalize();
+        orientation_vector.Normalize();
+        left_vector = Vector3.Cross(orientation_vector,lookat_vector);
+        orientation_vector = Vector3.Cross(lookat_vector,left_vector);
 
         universe.bro.updateGamma();
         if (Keyboard[OpenTK.Input.Key.Escape]) {
@@ -97,16 +139,24 @@ public class Canvas : GameWindow
 
     protected override void OnRenderFrame (FrameEventArgs e)
     {
+        Matrix4 local_look_at = Matrix4.LookAt(
+            camera_position,
+            Vector3.Add(camera_position,lookat_vector),
+            //Vector3.Add(camera_position,orientation_vector)
+            orientation_vector
+            );
         base.OnRenderFrame(e);
 
         OpenGL::GL.Clear(OpenGL::ClearBufferMask.ColorBufferBit | OpenGL::ClearBufferMask.DepthBufferBit);
 
-        Matrix4 lookat = Matrix4.LookAt (0, 5, 5, 0, 0, 0, 0, 1, 0);
+        //Matrix4 lookat = Matrix4.LookAt (0, 5, 5, 0, 0, 0, 0, 1, 0);
         OpenGL::GL.MatrixMode(OpenGL::MatrixMode.Modelview);
-        OpenGL::GL.LoadMatrix(ref lookat);
-        OpenGL::GL.Rotate(angle, rotate[_x], rotate[_y], rotate[_z]);
-        Console.WriteLine(String.Format("{0} @ {1}, {2}, {3}", angle, rotate[_x], rotate[_y], rotate[_z]));
 
+        //lookat.Rotate(Quaternion.FromAxisAngle(new Vector3(rotate[_x], rotate[_y], rotate[_z]),angle));
+
+        OpenGL::GL.LoadMatrix(ref local_look_at);
+        //OpenGL::GL.Rotate(angle, rotate[_x], rotate[_y], rotate[_z]);
+        //Console.WriteLine(String.Format("{0} @ {1}, {2}, {3}", angle, rotate[_x], rotate[_y], rotate[_z]));
         List<CoordinateEngine.RelativisticObject> ros = universe.GetNPCs ();
         lock (ros) {
             foreach (CoordinateEngine.RelativisticObject ro in ros) {
