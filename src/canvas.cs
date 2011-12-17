@@ -111,7 +111,6 @@ public class Canvas : GameWindow
 
 
         //Camera rotation
-        //angle = rotation_speed * (float)e.Time*(float)Math.PI/180.0f;
         //Will work for small angles, deviating at larger ones
         if (Keyboard[OpenTK.Input.Key.Right]||Keyboard[OpenTK.Input.Key.Keypad6]) {
             m_camera.ShiftDirection(0,-(float)e.Time,0);
@@ -136,7 +135,7 @@ public class Canvas : GameWindow
 
         lock(universe.bro){
             universe.bro.updateGamma();
-            universe.bro.v = CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.lookat_vector,(float)universe.bro.vrms));
+            //universe.bro.v = CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.lookat_vector,(float)universe.bro.vrms));
         }
         Console.WriteLine("{0}",universe.bro.gamma);
         if (Keyboard[OpenTK.Input.Key.Escape]) {
@@ -167,7 +166,7 @@ public class Canvas : GameWindow
             }
         }
         lock(universe.bro){
-            m_camera.camera_position = CoordinateEngine.toVector3(universe.bro.x);
+            m_camera.camera_position = CoordinateEngine.toVector3(universe.bro.x);//Loses accuracy in this...
         }
         DrawRelativisticObject(universe.bro, false);
 
