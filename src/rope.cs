@@ -47,7 +47,7 @@ public class Rope
                 List<CoordinateEngine.RelativisticObject> to_remove = new List<CoordinateEngine.RelativisticObject>();
                 foreach (CoordinateEngine.RelativisticObject obj in objs) {
                     obj.x[0] += .02;
-                    if (obj.x[0] > 3) {
+                    if (obj.x[0] > 30) {
                         to_remove.Add(obj);
                     }
                 }

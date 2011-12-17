@@ -231,4 +231,16 @@ public static class CoordinateEngine
         return answer;
     }
 
+    //Should this go somewhere else?
+    public static OpenTK.Vector3 toVector3(double[] input)
+    {
+        if(input.Length!=3){
+            throw new IndexOutOfRangeException();
+        }
+        return new OpenTK.Vector3((float)input[0],(float)input[1],(float)input[2]);
+    }
+    public static double[] toDoubleArray(OpenTK.Vector3 input){
+        return new double[3] {(double)input.X,(double)input.Y,(double)input.Z};
+    }
+
 }

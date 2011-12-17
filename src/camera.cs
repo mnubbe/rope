@@ -23,12 +23,13 @@ namespace rope
 
         //Camera vectors
         //Properties: Should be unit vectors and all orthoganol
+        //TODO: these should be private set, public get
         //lookat_vector is the direction of the camera view
-        private Vector3 lookat_vector =  new Vector3 (0,0,-1);
+        public Vector3 lookat_vector =  new Vector3 (0,0,-1);
         //orientation_vector is the direction up for the camera
-        private Vector3 orientation_vector = new Vector3 (0,1,0);
+        public Vector3 orientation_vector = new Vector3 (0,1,0);
         //left_vector is the direction directly to the left
-        private Vector3 left_vector = new Vector3 (1,0,0);//Points left by orientation cross lookat
+        public Vector3 left_vector = new Vector3 (1,0,0);//Points left by orientation cross lookat
 
         public camera ()
         {
@@ -104,6 +105,8 @@ namespace rope
             left_vector = Vector3.Cross(orientation_vector,lookat_vector);
             orientation_vector = Vector3.Cross(lookat_vector,left_vector);
         }
+
+
     }
 }
 

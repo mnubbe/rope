@@ -14,6 +14,9 @@ using OpenGL = OpenTK.Graphics.OpenGL;
 
 public class Canvas : GameWindow
 {
+    //Constants
+    private const float bro_acceleration = 0.3f;
+
     // Indices.
     private const int _x = 0;
     private const int _y = 1;
@@ -27,7 +30,8 @@ public class Canvas : GameWindow
     public Canvas(Universe u) : base(1920, 1080, new Graphics::GraphicsMode(16, 16))
     {
         universe = u;
-        m_camera = new rope.camera();
+        //m_camera = new rope.camera();
+        m_camera = new rope.camera (CoordinateEngine.toVector3(universe.bro.x), new Vector3(0,0,-1), new Vector3(0,1,0));
     }
 
 
@@ -75,22 +79,34 @@ public class Canvas : GameWindow
 
         // Camera lateral movement
         if (Keyboard[OpenTK.Input.Key.W]) {
-            m_camera.Fly((float)e.Time,0,0);
+            //m_camera.Fly((float)e.Time,0,0);
+            universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,
+                CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.lookat_vector,(float)e.Time*bro_acceleration)));
         }
         if (Keyboard[OpenTK.Input.Key.A]) {
-            m_camera.Fly(0,0,(float)e.Time);
+            //m_camera.Fly(0,0,(float)e.Time);
+            universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,
+                CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.lookat_vector,(float)e.Time*bro_acceleration)));
         }
         if (Keyboard[OpenTK.Input.Key.S]) {
-            m_camera.Fly(-(float)e.Time,0,0);
+            //m_camera.Fly(-(float)e.Time,0,0);
+            universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,
+                CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.left_vector,(float)-e.Time*bro_acceleration)));
         }
         if (Keyboard[OpenTK.Input.Key.D]) {
-            m_camera.Fly(0,0,-(float)e.Time);
+            //m_camera.Fly(0,0,-(float)e.Time);
+            universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,
+                CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.left_vector,(float)-e.Time*bro_acceleration)));
         }
         if (Keyboard[OpenTK.Input.Key.E]) {
-            m_camera.Fly(0,(float)e.Time,0);
+            //m_camera.Fly(0,(float)e.Time,0);
+            universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,
+                CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.orientation_vector,(float)e.Time*bro_acceleration)));
         }
         if (Keyboard[OpenTK.Input.Key.C]) {
-            m_camera.Fly(0,-(float)e.Time,0);
+            //m_camera.Fly(0,-(float)e.Time,0);
+            universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,
+                CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.orientation_vector,(float)-e.Time*bro_acceleration)));
         }
 
 
@@ -118,7 +134,11 @@ public class Canvas : GameWindow
 
         m_camera.NormalizeDirection();//Should be called every time direction is messed with
 
-        universe.bro.updateGamma();
+        lock(universe.bro){
+            universe.bro.updateGamma();
+            universe.bro.v = CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.lookat_vector,(float)universe.bro.vrms));
+        }
+        Console.WriteLine("{0}",universe.bro.gamma);
         if (Keyboard[OpenTK.Input.Key.Escape]) {
             this.Exit();
             return;
@@ -146,6 +166,9 @@ public class Canvas : GameWindow
                 DrawRelativisticObject (ro);
             }
         }
+        lock(universe.bro){
+            m_camera.camera_position = CoordinateEngine.toVector3(universe.bro.x);
+        }
         DrawRelativisticObject(universe.bro, false);
 
         this.SwapBuffers();
@@ -167,7 +190,7 @@ public class Canvas : GameWindow
         double y = ro.x[_y];
         double z = ro.x[_z];
 
-        double size = .1;
+        double size = .01*Math.Sqrt (CoordinateEngine.RMS(universe.bro.x));
 
         OpenGL::GL.Begin(OpenGL::BeginMode.Quads);
         if (issilver)
