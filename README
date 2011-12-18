@@ -12,3 +12,7 @@ E/C: move camera up/down
 Up/Down (arrow) OR 8/2 (numpad): rotate camera down/up (yea inverted flight controls)
 Left/Right (arrow) OR 4/6 (numpad): rotate camera left/right
 Home/PageUp OR 7/9 (numpad): roll camera CW/CCW (aka left/right roll)
+
+Backspace: Halt camera movement
+Shift: move/turn/accelerate slower (5x)
+Ctr:   move/turn/accelerate faster (5x)
