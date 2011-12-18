@@ -14,6 +14,9 @@ using OpenGL = OpenTK.Graphics.OpenGL;
 
 public class Canvas : GameWindow
 {
+    //Constants
+    private const float bro_acceleration = 0.3f;
+
     // Indices.
     private const int _x = 0;
     private const int _y = 1;
@@ -27,7 +30,8 @@ public class Canvas : GameWindow
     public Canvas(Universe u) : base(1920, 1080, new Graphics::GraphicsMode(16, 16))
     {
         universe = u;
-        m_camera = new rope.camera();
+        //m_camera = new rope.camera();
+        m_camera = new rope.camera (CoordinateEngine.toVector3(universe.bro.x), new Vector3(0,0,-1), new Vector3(0,1,0));
     }
 
 
@@ -75,27 +79,38 @@ public class Canvas : GameWindow
 
         // Camera lateral movement
         if (Keyboard[OpenTK.Input.Key.W]) {
-            m_camera.Fly((float)e.Time,0,0);
+            //m_camera.Fly((float)e.Time,0,0);
+            universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,
+                CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.lookat_vector,(float)e.Time*bro_acceleration)));
         }
         if (Keyboard[OpenTK.Input.Key.A]) {
-            m_camera.Fly(0,0,(float)e.Time);
+            //m_camera.Fly(0,0,(float)e.Time);
+            universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,
+                CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.left_vector,(float)e.Time*bro_acceleration)));
         }
         if (Keyboard[OpenTK.Input.Key.S]) {
-            m_camera.Fly(-(float)e.Time,0,0);
+            //m_camera.Fly(-(float)e.Time,0,0);
+            universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,
+                CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.lookat_vector,(float)e.Time*(-bro_acceleration))));
         }
         if (Keyboard[OpenTK.Input.Key.D]) {
-            m_camera.Fly(0,0,-(float)e.Time);
+            //m_camera.Fly(0,0,-(float)e.Time);
+            universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,
+                CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.left_vector,(float)e.Time*(-bro_acceleration))));
         }
         if (Keyboard[OpenTK.Input.Key.E]) {
-            m_camera.Fly(0,(float)e.Time,0);
+            //m_camera.Fly(0,(float)e.Time,0);
+            universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,
+                CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.orientation_vector,(float)e.Time*bro_acceleration)));
         }
         if (Keyboard[OpenTK.Input.Key.C]) {
-            m_camera.Fly(0,-(float)e.Time,0);
+            //m_camera.Fly(0,-(float)e.Time,0);
+            universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,
+                CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.orientation_vector,(float)e.Time*(-bro_acceleration))));
         }
 
 
         //Camera rotation
-        //angle = rotation_speed * (float)e.Time*(float)Math.PI/180.0f;
         //Will work for small angles, deviating at larger ones
         if (Keyboard[OpenTK.Input.Key.Right]||Keyboard[OpenTK.Input.Key.Keypad6]) {
             m_camera.ShiftDirection(0,-(float)e.Time,0);
@@ -118,7 +133,11 @@ public class Canvas : GameWindow
 
         m_camera.NormalizeDirection();//Should be called every time direction is messed with
 
-        universe.bro.updateGamma();
+        lock(universe.bro){
+            universe.bro.updateGamma();
+            //universe.bro.v = CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.lookat_vector,(float)universe.bro.vrms));
+        }
+        Console.WriteLine("{0}, ({1},{2},{3})",universe.bro.gamma, universe.bro.v[0],universe.bro.v[1],universe.bro.v[2]);
         if (Keyboard[OpenTK.Input.Key.Escape]) {
             this.Exit();
             return;
@@ -146,7 +165,10 @@ public class Canvas : GameWindow
                 DrawRelativisticObject (ro);
             }
         }
-        DrawRelativisticObject(universe.bro, false);
+        lock(universe.bro){
+            m_camera.camera_position = CoordinateEngine.toVector3(universe.bro.x);//Loses accuracy in this...
+        }
+        //DrawRelativisticObject(universe.bro, false);//Don't draw bro if the camera is at bro.
 
         this.SwapBuffers();
         Thread.Sleep(1);
@@ -167,11 +189,11 @@ public class Canvas : GameWindow
         double y = ro.x[_y];
         double z = ro.x[_z];
 
-        double size = .1;
+        double size = .01*Math.Sqrt (CoordinateEngine.RMS(universe.bro.x));
 
         OpenGL::GL.Begin(OpenGL::BeginMode.Quads);
         if (issilver)
-            OpenGL::GL.Color3(Color.Silver);
+            OpenGL::GL.Color3(ArbitraryRedshiftBasedColor(ro,universe.bro));
         else
             OpenGL::GL.Color3(Color.Blue);
 
@@ -212,6 +234,34 @@ public class Canvas : GameWindow
         OpenGL::GL.Vertex3(x - size, y + size, z - size);
 
         OpenGL::GL.End();
+    }
+
+    private System.Drawing.Color ArbitraryRedshiftBasedColor(CoordinateEngine.RelativisticObject dude, CoordinateEngine.RelativisticObject reference)
+    {
+        //Get z from the two objects
+        //for information about z, see http://en.wikipedia.org/wiki/Redshift
+        //z==0 means no shift
+        //1+z = wavelength(observed)/wavelength(emitted)
+        //so multiply the object's wavelength by (1+z)
+        //the shift from pure green to pure red or pure blue to pure green is about z=0.17, so this would not be the most dynamic scale for large z
+        double z = CoordinateEngine.calculateRedshiftZ(dude,universe.bro);
+
+        //"Accurate" values
+        const double upperlimit = 0.17;
+        const double lowerlimit = -0.146;
+
+        //Way to "soften" the quick and hard transition between colors.  The 1/exponent roughly multiplies the visible spectrum window...
+        z = -1.0+Math.Pow(1.0+z,1.0/1.0);
+
+        if(z>upperlimit){//receding fast
+            return System.Drawing.Color.FromArgb(127,5,10);
+        }else if(z<lowerlimit){//approaching fast
+            return System.Drawing.Color.FromArgb(127,0,255);
+        }else if(z>0.0){
+            return System.Drawing.Color.FromArgb((int)(z/upperlimit*255),(int)(255*(1-z/upperlimit)),0);
+        }else{//z<0.0
+            return System.Drawing.Color.FromArgb(0,(int)(255*(1-z/lowerlimit)),(int)(z/lowerlimit*255));
+        }
     }
 }
 

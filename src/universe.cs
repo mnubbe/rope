@@ -9,7 +9,7 @@ public class Universe
 {
     // Actors.
     public CoordinateEngine.RelativisticObject bro = new
-        CoordinateEngine.RelativisticObject(0, 0, 0);
+        CoordinateEngine.RelativisticObject(0, 0, 5);
     List<CoordinateEngine.RelativisticObject> dudes = new
         List<CoordinateEngine.RelativisticObject>();
 
@@ -53,8 +53,8 @@ public class Universe
             for (int j=0; j<4; j++) {
                 dude = dudes [j + 4 * i];
                 mytime = dude.observedUniverseTime (universe_time, bro);
-                dude.x [0] = 1 * Math.Cos (mytime * 1.2) + 4*i * .1;
-                dude.x [1] = 1 * Math.Sin (mytime * 1.2) + 4*j * .1;
+                dude.x [0] = 10.0 * Math.Cos (mytime * 0.10) + 4*i * .1;
+                dude.x [1] = 10.0 * Math.Sin (mytime * 0.10) + 4*j * .1;
                 //dude.t_last_update = dude.observedUniverseTime (universe_time, bro);
                 //dudes[j+4*i].x[0] = 100*Math.Sin(
                 dude.t_last_update = mytime;
