@@ -8,8 +8,8 @@ using System.Drawing;
 using System.Threading;
 
 using OpenTK;
-using Graphics = OpenTK.Graphics;
-using OpenGL = OpenTK.Graphics.OpenGL;
+using OpenTK.Input;
+using OpenTK.Graphics.OpenGL;
 
 using ClassLibrary1.Collections.Generic;
 
@@ -33,7 +33,7 @@ public class Canvas : GameWindow
 
 
     /// <param name="u">A Universe to display.</param>
-    public Canvas(Universe u) : base(1920, 1080, new Graphics.GraphicsMode(16, 16))
+    public Canvas(Universe u) : base(1920, 1080, new OpenTK.Graphics.GraphicsMode(16, 16))
     {
         universe = u;
         m_camera = new rope.camera (CoordinateEngine.toVector3(universe.bro.x), new Vector3(0,0,-1), new Vector3(0,1,0));
@@ -44,8 +44,8 @@ public class Canvas : GameWindow
     {
         base.OnLoad(e);
 
-        OpenGL.GL.ClearColor(Color.Black);
-        OpenGL.GL.Enable(OpenGL.EnableCap.DepthTest);
+        GL.ClearColor(Color.Black);
+        GL.Enable(EnableCap.DepthTest);
     }
 
 
@@ -53,13 +53,13 @@ public class Canvas : GameWindow
     {
         base.OnResize(e);
 
-        OpenGL.GL.Viewport(0, 0, Width, Height);
+        GL.Viewport(0, 0, Width, Height);
 
         double aspect_ratio = Width / (double)Height;
 
         OpenTK.Matrix4 perspective = OpenTK.Matrix4.CreatePerspectiveFieldOfView(MathHelper.PiOver4, (float)aspect_ratio, 1, 64);
-        OpenGL.GL.MatrixMode(OpenGL.MatrixMode.Projection);
-        OpenGL.GL.LoadMatrix(ref perspective);
+        GL.MatrixMode(MatrixMode.Projection);
+        GL.LoadMatrix(ref perspective);
     }
 
 
@@ -70,32 +70,32 @@ public class Canvas : GameWindow
         // Handle input.
 
         // Camera lateral movement
-        if (Keyboard[OpenTK.Input.Key.W]) {
+        if (Keyboard[Key.W]) {
             //m_camera.Fly((float)e.Time,0,0);
             universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,
                 CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.lookat_vector,(float)e.Time*bro_acceleration)));
         }
-        if (Keyboard[OpenTK.Input.Key.A]) {
+        if (Keyboard[Key.A]) {
             //m_camera.Fly(0,0,(float)e.Time);
             universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,
                 CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.left_vector,(float)e.Time*bro_acceleration)));
         }
-        if (Keyboard[OpenTK.Input.Key.S]) {
+        if (Keyboard[Key.S]) {
             //m_camera.Fly(-(float)e.Time,0,0);
             universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,
                 CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.lookat_vector,(float)e.Time*(-bro_acceleration))));
         }
-        if (Keyboard[OpenTK.Input.Key.D]) {
+        if (Keyboard[Key.D]) {
             //m_camera.Fly(0,0,-(float)e.Time);
             universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,
                 CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.left_vector,(float)e.Time*(-bro_acceleration))));
         }
-        if (Keyboard[OpenTK.Input.Key.E]) {
+        if (Keyboard[Key.E]) {
             //m_camera.Fly(0,(float)e.Time,0);
             universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,
                 CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.orientation_vector,(float)e.Time*bro_acceleration)));
         }
-        if (Keyboard[OpenTK.Input.Key.C]) {
+        if (Keyboard[Key.C]) {
             //m_camera.Fly(0,-(float)e.Time,0);
             universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,
                 CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.orientation_vector,(float)e.Time*(-bro_acceleration))));
@@ -104,22 +104,22 @@ public class Canvas : GameWindow
 
         //Camera rotation
         //Will work for small angles, deviating at larger ones
-        if (Keyboard[OpenTK.Input.Key.Right]||Keyboard[OpenTK.Input.Key.Keypad6]) {
+        if (Keyboard[Key.Right]||Keyboard[Key.Keypad6]) {
             m_camera.ShiftDirection(0,-(float)e.Time,0);
         }
-        if (Keyboard[OpenTK.Input.Key.Left]||Keyboard[OpenTK.Input.Key.Keypad4]) {
+        if (Keyboard[Key.Left]||Keyboard[Key.Keypad4]) {
             m_camera.ShiftDirection(0,(float)e.Time,0);
         }
-        if (Keyboard[OpenTK.Input.Key.Down]||Keyboard[OpenTK.Input.Key.Keypad2]) {//up, I wanted inverted controls for testing
+        if (Keyboard[Key.Down]||Keyboard[Key.Keypad2]) {//up, I wanted inverted controls for testing
             m_camera.ShiftDirection((float)e.Time,0,0);
         }
-        if (Keyboard[OpenTK.Input.Key.Up]||Keyboard[OpenTK.Input.Key.Keypad8]) {//down, I wanted inverted controls for testing
+        if (Keyboard[Key.Up]||Keyboard[Key.Keypad8]) {//down, I wanted inverted controls for testing
             m_camera.ShiftDirection(-(float)e.Time,0,0);
         }
-        if (Keyboard[OpenTK.Input.Key.Home]||Keyboard[OpenTK.Input.Key.Keypad7]) {//Roll left
+        if (Keyboard[Key.Home]||Keyboard[Key.Keypad7]) {//Roll left
             m_camera.ShiftDirection(0,0,(float)e.Time);
         }
-        if (Keyboard[OpenTK.Input.Key.PageUp]||Keyboard[OpenTK.Input.Key.Keypad9]) {//Roll right
+        if (Keyboard[Key.PageUp]||Keyboard[Key.Keypad9]) {//Roll right
             m_camera.ShiftDirection(0,0,-(float)e.Time);
         }
 
@@ -130,7 +130,7 @@ public class Canvas : GameWindow
             //universe.bro.v = CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.lookat_vector,(float)universe.bro.vrms));  //Airplane with no brake mode
         }
         //Console.WriteLine("{0}, ({1},{2},{3})",universe.bro.gamma, universe.bro.v[0],universe.bro.v[1],universe.bro.v[2]);
-        if (Keyboard[OpenTK.Input.Key.Escape]) {
+        if (Keyboard[Key.Escape]) {
             this.Exit();
             return;
         }
@@ -142,9 +142,9 @@ public class Canvas : GameWindow
         DateTime start = DateTime.Now;
         base.OnRenderFrame(e);
 
-        OpenGL.GL.Clear(OpenGL.ClearBufferMask.ColorBufferBit | OpenGL.ClearBufferMask.DepthBufferBit);
+        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-        OpenGL.GL.MatrixMode(OpenGL.MatrixMode.Modelview);
+        GL.MatrixMode(MatrixMode.Modelview);
 
         m_camera.UpdateCameraView();
         List<CoordinateEngine.RelativisticObject> ros = universe.GetNPCs();
@@ -185,49 +185,49 @@ public class Canvas : GameWindow
         //double size = .01*Math.Sqrt (CoordinateEngine.RMS(universe.bro.x));
         double size = 0.01;
 
-        OpenGL.GL.Begin(OpenGL.BeginMode.Quads);
+        GL.Begin(BeginMode.Quads);
         if (issilver)
-            OpenGL.GL.Color3(ArbitraryRedshiftBasedColor(ro,universe.bro));
+            GL.Color3(ArbitraryRedshiftBasedColor(ro,universe.bro));
         else
-            OpenGL.GL.Color3(Color.Blue);
+            GL.Color3(Color.Blue);
 
         // front
-        OpenGL.GL.Vertex3(x - size, y - size, z + size);
-        OpenGL.GL.Vertex3(x - size, y + size, z + size);
-        OpenGL.GL.Vertex3(x + size, y + size, z + size);
-        OpenGL.GL.Vertex3(x + size, y - size, z + size);
+        GL.Vertex3(x - size, y - size, z + size);
+        GL.Vertex3(x - size, y + size, z + size);
+        GL.Vertex3(x + size, y + size, z + size);
+        GL.Vertex3(x + size, y - size, z + size);
 
         // right
-        OpenGL.GL.Vertex3(x + size, y - size, z + size);
-        OpenGL.GL.Vertex3(x + size, y + size, z + size);
-        OpenGL.GL.Vertex3(x + size, y + size, z - size);
-        OpenGL.GL.Vertex3(x + size, y - size, z - size);
+        GL.Vertex3(x + size, y - size, z + size);
+        GL.Vertex3(x + size, y + size, z + size);
+        GL.Vertex3(x + size, y + size, z - size);
+        GL.Vertex3(x + size, y - size, z - size);
 
         // bottom
-        OpenGL.GL.Vertex3(x + size, y - size, z - size);
-        OpenGL.GL.Vertex3(x + size, y - size, z + size);
-        OpenGL.GL.Vertex3(x - size, y - size, z + size);
-        OpenGL.GL.Vertex3(x - size, y - size, z - size);
+        GL.Vertex3(x + size, y - size, z - size);
+        GL.Vertex3(x + size, y - size, z + size);
+        GL.Vertex3(x - size, y - size, z + size);
+        GL.Vertex3(x - size, y - size, z - size);
 
         // left
-        OpenGL.GL.Vertex3(x - size, y - size, z - size);
-        OpenGL.GL.Vertex3(x - size, y - size, z + size);
-        OpenGL.GL.Vertex3(x - size, y + size, z + size);
-        OpenGL.GL.Vertex3(x - size, y + size, z - size);
+        GL.Vertex3(x - size, y - size, z - size);
+        GL.Vertex3(x - size, y - size, z + size);
+        GL.Vertex3(x - size, y + size, z + size);
+        GL.Vertex3(x - size, y + size, z - size);
 
         // top
-        OpenGL.GL.Vertex3(x - size, y + size, z - size);
-        OpenGL.GL.Vertex3(x - size, y + size, z + size);
-        OpenGL.GL.Vertex3(x + size, y + size, z + size);
-        OpenGL.GL.Vertex3(x + size, y + size, z - size);
+        GL.Vertex3(x - size, y + size, z - size);
+        GL.Vertex3(x - size, y + size, z + size);
+        GL.Vertex3(x + size, y + size, z + size);
+        GL.Vertex3(x + size, y + size, z - size);
 
         // back
-        OpenGL.GL.Vertex3(x + size, y + size, z - size);
-        OpenGL.GL.Vertex3(x + size, y - size, z - size);
-        OpenGL.GL.Vertex3(x - size, y - size, z - size);
-        OpenGL.GL.Vertex3(x - size, y + size, z - size);
+        GL.Vertex3(x + size, y + size, z - size);
+        GL.Vertex3(x + size, y - size, z - size);
+        GL.Vertex3(x - size, y - size, z - size);
+        GL.Vertex3(x - size, y + size, z - size);
 
-        OpenGL.GL.End();
+        GL.End();
     }
 
 
@@ -263,13 +263,13 @@ public class Canvas : GameWindow
     private void DrawHUD()
     {
         // Switch to orthographic.
-        OpenGL.GL.Disable(OpenGL.EnableCap.DepthTest);
-        OpenGL.GL.MatrixMode(OpenGL.MatrixMode.Projection);
-        OpenGL.GL.PushMatrix();
-        OpenGL.GL.LoadIdentity();
-        OpenGL.GL.Ortho(0, Width, Height, 0, -5, 1);
-        OpenGL.GL.MatrixMode(OpenGL.MatrixMode.Modelview);
-        OpenGL.GL.LoadIdentity();
+        GL.Disable(EnableCap.DepthTest);
+        GL.MatrixMode(MatrixMode.Projection);
+        GL.PushMatrix();
+        GL.LoadIdentity();
+        GL.Ortho(0, Width, Height, 0, -5, 1);
+        GL.MatrixMode(MatrixMode.Modelview);
+        GL.LoadIdentity();
 
         if (frame_count > 0 && frame_count % FPS_WINDOW == 0) {
             int total_ms = 0;
@@ -282,15 +282,15 @@ public class Canvas : GameWindow
         if (fps >= 0) {
             fps_str = fps.ToString();
         }
-        Graphics.TextPrinter printer = new Graphics.TextPrinter();
+        OpenTK.Graphics.TextPrinter printer = new OpenTK.Graphics.TextPrinter();
         Font font = new Font(FontFamily.GenericSerif, 12);
         printer.Print("FPS: " + fps_str, font, Color.White, new RectangleF(50, 50, 200, 50));
 
         // Switch back.
-        OpenGL.GL.Enable(OpenGL.EnableCap.DepthTest);
-        OpenGL.GL.MatrixMode(OpenGL.MatrixMode.Projection);
-        OpenGL.GL.PopMatrix();
-        OpenGL.GL.MatrixMode(OpenGL.MatrixMode.Modelview);
+        GL.Enable(EnableCap.DepthTest);
+        GL.MatrixMode(MatrixMode.Projection);
+        GL.PopMatrix();
+        GL.MatrixMode(MatrixMode.Modelview);
     }
 }
 
