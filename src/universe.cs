@@ -32,13 +32,30 @@ public class Universe
         return dudes;
     }
 
-
+    private static class DemoConsts{
+        public static int    array_size = 10;
+        public static double speed = 0.1;
+        public static double spacing = 0.1;
+        public static double radius = 1/Math.PI/2;
+        public static double x_center = 0.0;
+        public static double y_center = 0.0;
+        public static double phase = 0.0;//Adds a phase to the circle progression.  Math.PI/2 per quarter rotation
+    }
     //Populates the dudes, as a hard-coded demo
     public void InitDemo ()
     {
-        for (int i=0; i<4; i++) {
-            for (int j=0; j<4; j++) {
-                dudes.Add (new CoordinateEngine.RelativisticObject (i * 4*.100 + 4*.050, 4*j * .1, 0));
+        for (int i=0; i<DemoConsts.array_size; i++) {
+            for (int j=0; j<DemoConsts.array_size; j++) {
+                CoordinateEngine.RelativisticObject new_guy = new CoordinateEngine.RelativisticObject(0,0,0);
+
+                new_guy.vrms = DemoConsts.speed;
+                double new_gamma = double.PositiveInfinity;
+                if(DemoConsts.speed<1.0){
+                    new_gamma = CoordinateEngine.computeGamma(DemoConsts.speed);
+                }
+                new_guy.gamma = new_gamma;
+
+                dudes.Add(new_guy);//This mess of things at 0,0,0 sorts itself out after a few frames using UpdateDudes(), don't worry
             }
         }
     }
@@ -49,14 +66,19 @@ public class Universe
     {
         CoordinateEngine.RelativisticObject dude;
         double mytime;
-        for (int i=0; i<4; i++) {
-            for (int j=0; j<4; j++) {
-                dude = dudes [j + 4 * i];
+        for (int i=0; i<DemoConsts.array_size; i++) {
+            for (int j=0; j<DemoConsts.array_size; j++) {
+                dude = dudes [j + DemoConsts.array_size * i];
                 mytime = dude.observedUniverseTime (universe_time, bro);
-                dude.x [0] = 10.0 * Math.Cos (mytime * 0.10) + 4*i * .1;
-                dude.x [1] = 10.0 * Math.Sin (mytime * 0.10) + 4*j * .1;
-                //dude.t_last_update = dude.observedUniverseTime (universe_time, bro);
-                //dudes[j+4*i].x[0] = 100*Math.Sin(
+                dude.x[0] = DemoConsts.x_center + i*DemoConsts.spacing + DemoConsts.radius * Math.Cos(
+                    DemoConsts.phase + mytime*DemoConsts.speed/DemoConsts.radius);
+                dude.x[1] = DemoConsts.x_center + j*DemoConsts.spacing + DemoConsts.radius * Math.Sin(
+                    DemoConsts.phase + mytime*DemoConsts.speed/DemoConsts.radius);
+                dude.v[0] = (-1) * DemoConsts.speed * Math.Sin (
+                    DemoConsts.phase + mytime*DemoConsts.speed/DemoConsts.radius);
+                dude.v[1] = (1)  * DemoConsts.speed * Math.Cos (
+                    DemoConsts.phase + mytime*DemoConsts.speed/DemoConsts.radius);
+
                 dude.t_last_update = mytime;
             }
         }

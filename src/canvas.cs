@@ -15,7 +15,7 @@ using OpenGL = OpenTK.Graphics.OpenGL;
 public class Canvas : GameWindow
 {
     //Constants
-    private const float bro_acceleration = 0.3f;
+    private const float bro_acceleration = 0.9f;
 
     // Indices.
     private const int _x = 0;
@@ -30,7 +30,6 @@ public class Canvas : GameWindow
     public Canvas(Universe u) : base(1920, 1080, new Graphics::GraphicsMode(16, 16))
     {
         universe = u;
-        //m_camera = new rope.camera();
         m_camera = new rope.camera (CoordinateEngine.toVector3(universe.bro.x), new Vector3(0,0,-1), new Vector3(0,1,0));
     }
 
@@ -63,19 +62,6 @@ public class Canvas : GameWindow
         base.OnUpdateFrame(e);
 
         // Handle input.
-        /*// Bro movement.
-        if (Keyboard[OpenTK.Input.Key.W]) {
-            universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,new double[3]{0,.1,0});
-        }
-        if (Keyboard[OpenTK.Input.Key.A]) {
-            universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,new double[3]{-.1,0,0});
-        }
-        if (Keyboard[OpenTK.Input.Key.S]) {
-            universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,new double[3]{0,-.1,0});
-        }
-        if (Keyboard[OpenTK.Input.Key.D]) {
-            universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,new double[3]{.1,0,0});
-        }*/
 
         // Camera lateral movement
         if (Keyboard[OpenTK.Input.Key.W]) {
@@ -134,10 +120,10 @@ public class Canvas : GameWindow
         m_camera.NormalizeDirection();//Should be called every time direction is messed with
 
         lock(universe.bro){
-            universe.bro.updateGamma();
-            //universe.bro.v = CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.lookat_vector,(float)universe.bro.vrms));
+            universe.bro.updateGamma();  //Drifting astronaut mode
+            //universe.bro.v = CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.lookat_vector,(float)universe.bro.vrms));  //Airplane with no brake mode
         }
-        Console.WriteLine("{0}, ({1},{2},{3})",universe.bro.gamma, universe.bro.v[0],universe.bro.v[1],universe.bro.v[2]);
+        //Console.WriteLine("{0}, ({1},{2},{3})",universe.bro.gamma, universe.bro.v[0],universe.bro.v[1],universe.bro.v[2]);
         if (Keyboard[OpenTK.Input.Key.Escape]) {
             this.Exit();
             return;
@@ -151,14 +137,9 @@ public class Canvas : GameWindow
 
         OpenGL::GL.Clear(OpenGL::ClearBufferMask.ColorBufferBit | OpenGL::ClearBufferMask.DepthBufferBit);
 
-        //Matrix4 lookat = Matrix4.LookAt (0, 5, 5, 0, 0, 0, 0, 1, 0);
         OpenGL::GL.MatrixMode(OpenGL::MatrixMode.Modelview);
 
         m_camera.UpdateCameraView();
-        //lookat.Rotate(Quaternion.FromAxisAngle(new Vector3(rotate[_x], rotate[_y], rotate[_z]),angle));
-
-        //OpenGL::GL.Rotate(angle, rotate[_x], rotate[_y], rotate[_z]);
-        //Console.WriteLine(String.Format("{0} @ {1}, {2}, {3}", angle, rotate[_x], rotate[_y], rotate[_z]));
         List<CoordinateEngine.RelativisticObject> ros = universe.GetNPCs ();
         lock (ros) {
             foreach (CoordinateEngine.RelativisticObject ro in ros) {
@@ -189,7 +170,8 @@ public class Canvas : GameWindow
         double y = ro.x[_y];
         double z = ro.x[_z];
 
-        double size = .01*Math.Sqrt (CoordinateEngine.RMS(universe.bro.x));
+        //double size = .01*Math.Sqrt (CoordinateEngine.RMS(universe.bro.x));
+        double size = 0.01;
 
         OpenGL::GL.Begin(OpenGL::BeginMode.Quads);
         if (issilver)
