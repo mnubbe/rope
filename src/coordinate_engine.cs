@@ -222,6 +222,7 @@ public static class CoordinateEngine
         //Debug.Assert(RMS(v)<1.0, "Speed of light is exceeded on gamma calculation");
         answer = 1.0/Math.Sqrt(answer);//This line also will complain about vrms>1.0
         return answer;
+        //return computeGamma(RMS (v));//Also should work
     }
     public static double computeGamma(double vrms)
     {
@@ -242,5 +243,19 @@ public static class CoordinateEngine
     public static double[] toDoubleArray(OpenTK.Vector3 input){
         return new double[3] {(double)input.X,(double)input.Y,(double)input.Z};
     }
+    public static double calculateRedshiftZ(RelativisticObject emitter, RelativisticObject observer)
+    {
+        double[] velocity_difference = velocityDifference(emitter,observer);
 
+        //all velocities below are implicitly from the difference
+        //which gamma do we care about?  v parallel or v total?
+        //Arguably v total, actually.  Think time dilation
+        double velocity_rms = RMS (velocity_difference);
+        double mygamma = computeGamma(velocity_rms);
+        double[] position_difference = referencePositionDifference(observer,emitter);
+        double v_parallel_component = dotProduct(velocity_difference,position_difference)/RMS (position_difference);
+
+        double answer = -1.0 + mygamma * (1+v_parallel_component);
+        return answer;
+    }
 }

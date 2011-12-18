@@ -86,17 +86,17 @@ public class Canvas : GameWindow
         if (Keyboard[OpenTK.Input.Key.A]) {
             //m_camera.Fly(0,0,(float)e.Time);
             universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,
-                CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.lookat_vector,(float)e.Time*bro_acceleration)));
+                CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.left_vector,(float)e.Time*bro_acceleration)));
         }
         if (Keyboard[OpenTK.Input.Key.S]) {
             //m_camera.Fly(-(float)e.Time,0,0);
             universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,
-                CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.left_vector,(float)-e.Time*bro_acceleration)));
+                CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.lookat_vector,(float)e.Time*(-bro_acceleration))));
         }
         if (Keyboard[OpenTK.Input.Key.D]) {
             //m_camera.Fly(0,0,-(float)e.Time);
             universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,
-                CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.left_vector,(float)-e.Time*bro_acceleration)));
+                CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.left_vector,(float)e.Time*(-bro_acceleration))));
         }
         if (Keyboard[OpenTK.Input.Key.E]) {
             //m_camera.Fly(0,(float)e.Time,0);
@@ -106,7 +106,7 @@ public class Canvas : GameWindow
         if (Keyboard[OpenTK.Input.Key.C]) {
             //m_camera.Fly(0,-(float)e.Time,0);
             universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,
-                CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.orientation_vector,(float)-e.Time*bro_acceleration)));
+                CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.orientation_vector,(float)e.Time*(-bro_acceleration))));
         }
 
 
@@ -137,7 +137,7 @@ public class Canvas : GameWindow
             universe.bro.updateGamma();
             //universe.bro.v = CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.lookat_vector,(float)universe.bro.vrms));
         }
-        Console.WriteLine("{0}",universe.bro.gamma);
+        Console.WriteLine("{0}, ({1},{2},{3})",universe.bro.gamma, universe.bro.v[0],universe.bro.v[1],universe.bro.v[2]);
         if (Keyboard[OpenTK.Input.Key.Escape]) {
             this.Exit();
             return;
@@ -168,7 +168,7 @@ public class Canvas : GameWindow
         lock(universe.bro){
             m_camera.camera_position = CoordinateEngine.toVector3(universe.bro.x);//Loses accuracy in this...
         }
-        DrawRelativisticObject(universe.bro, false);
+        //DrawRelativisticObject(universe.bro, false);//Don't draw bro if the camera is at bro.
 
         this.SwapBuffers();
         Thread.Sleep(1);
@@ -193,7 +193,7 @@ public class Canvas : GameWindow
 
         OpenGL::GL.Begin(OpenGL::BeginMode.Quads);
         if (issilver)
-            OpenGL::GL.Color3(Color.Silver);
+            OpenGL::GL.Color3(ArbitraryRedshiftBasedColor(ro,universe.bro));
         else
             OpenGL::GL.Color3(Color.Blue);
 
@@ -234,6 +234,34 @@ public class Canvas : GameWindow
         OpenGL::GL.Vertex3(x - size, y + size, z - size);
 
         OpenGL::GL.End();
+    }
+
+    private System.Drawing.Color ArbitraryRedshiftBasedColor(CoordinateEngine.RelativisticObject dude, CoordinateEngine.RelativisticObject reference)
+    {
+        //Get z from the two objects
+        //for information about z, see http://en.wikipedia.org/wiki/Redshift
+        //z==0 means no shift
+        //1+z = wavelength(observed)/wavelength(emitted)
+        //so multiply the object's wavelength by (1+z)
+        //the shift from pure green to pure red or pure blue to pure green is about z=0.17, so this would not be the most dynamic scale for large z
+        double z = CoordinateEngine.calculateRedshiftZ(dude,universe.bro);
+
+        //"Accurate" values
+        const double upperlimit = 0.17;
+        const double lowerlimit = -0.146;
+
+        //Way to "soften" the quick and hard transition between colors.  The 1/exponent roughly multiplies the visible spectrum window...
+        z = -1.0+Math.Pow(1.0+z,1.0/1.0);
+
+        if(z>upperlimit){//receding fast
+            return System.Drawing.Color.FromArgb(127,5,10);
+        }else if(z<lowerlimit){//approaching fast
+            return System.Drawing.Color.FromArgb(127,0,255);
+        }else if(z>0.0){
+            return System.Drawing.Color.FromArgb((int)(z/upperlimit*255),(int)(255*(1-z/upperlimit)),0);
+        }else{//z<0.0
+            return System.Drawing.Color.FromArgb(0,(int)(255*(1-z/lowerlimit)),(int)(z/lowerlimit*255));
+        }
     }
 }
 
