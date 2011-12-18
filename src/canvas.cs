@@ -11,11 +11,14 @@ using OpenTK;
 using Graphics = OpenTK.Graphics;
 using OpenGL = OpenTK.Graphics.OpenGL;
 
+using ClassLibrary1.Collections.Generic;
+
 
 public class Canvas : GameWindow
 {
     //Constants
     private const float bro_acceleration = 0.9f;
+    private const int FPS_WINDOW = 150;
 
     // Indices.
     private const int _x = 0;
@@ -24,10 +27,13 @@ public class Canvas : GameWindow
 
     private Universe universe;
     private rope.camera m_camera;
+    private RingBuffer<int> frame_ticks = new RingBuffer<int>(FPS_WINDOW);
+    private long frame_count = 0;
+    private int fps = -1;
 
 
     /// <param name="u">A Universe to display.</param>
-    public Canvas(Universe u) : base(1920, 1080, new Graphics::GraphicsMode(16, 16))
+    public Canvas(Universe u) : base(1920, 1080, new Graphics.GraphicsMode(16, 16))
     {
         universe = u;
         m_camera = new rope.camera (CoordinateEngine.toVector3(universe.bro.x), new Vector3(0,0,-1), new Vector3(0,1,0));
@@ -38,8 +44,8 @@ public class Canvas : GameWindow
     {
         base.OnLoad(e);
 
-        OpenGL::GL.ClearColor(Color.Black);
-        OpenGL::GL.Enable(OpenGL::EnableCap.DepthTest);
+        OpenGL.GL.ClearColor(Color.Black);
+        OpenGL.GL.Enable(OpenGL.EnableCap.DepthTest);
     }
 
 
@@ -47,13 +53,13 @@ public class Canvas : GameWindow
     {
         base.OnResize(e);
 
-        OpenGL::GL.Viewport(0, 0, Width, Height);
+        OpenGL.GL.Viewport(0, 0, Width, Height);
 
         double aspect_ratio = Width / (double)Height;
 
         OpenTK.Matrix4 perspective = OpenTK.Matrix4.CreatePerspectiveFieldOfView(MathHelper.PiOver4, (float)aspect_ratio, 1, 64);
-        OpenGL::GL.MatrixMode(OpenGL::MatrixMode.Projection);
-        OpenGL::GL.LoadMatrix(ref perspective);
+        OpenGL.GL.MatrixMode(OpenGL.MatrixMode.Projection);
+        OpenGL.GL.LoadMatrix(ref perspective);
     }
 
 
@@ -133,14 +139,15 @@ public class Canvas : GameWindow
 
     protected override void OnRenderFrame (FrameEventArgs e)
     {
+        DateTime start = DateTime.Now;
         base.OnRenderFrame(e);
 
-        OpenGL::GL.Clear(OpenGL::ClearBufferMask.ColorBufferBit | OpenGL::ClearBufferMask.DepthBufferBit);
+        OpenGL.GL.Clear(OpenGL.ClearBufferMask.ColorBufferBit | OpenGL.ClearBufferMask.DepthBufferBit);
 
-        OpenGL::GL.MatrixMode(OpenGL::MatrixMode.Modelview);
+        OpenGL.GL.MatrixMode(OpenGL.MatrixMode.Modelview);
 
         m_camera.UpdateCameraView();
-        List<CoordinateEngine.RelativisticObject> ros = universe.GetNPCs ();
+        List<CoordinateEngine.RelativisticObject> ros = universe.GetNPCs();
         lock (ros) {
             foreach (CoordinateEngine.RelativisticObject ro in ros) {
                 DrawRelativisticObject (ro);
@@ -150,6 +157,11 @@ public class Canvas : GameWindow
             m_camera.camera_position = CoordinateEngine.toVector3(universe.bro.x);//Loses accuracy in this...
         }
         //DrawRelativisticObject(universe.bro, false);//Don't draw bro if the camera is at bro.
+
+        DrawHUD();
+
+        frame_count++;
+        frame_ticks.Add((DateTime.Now - start).Milliseconds);
 
         this.SwapBuffers();
         Thread.Sleep(1);
@@ -173,50 +185,51 @@ public class Canvas : GameWindow
         //double size = .01*Math.Sqrt (CoordinateEngine.RMS(universe.bro.x));
         double size = 0.01;
 
-        OpenGL::GL.Begin(OpenGL::BeginMode.Quads);
+        OpenGL.GL.Begin(OpenGL.BeginMode.Quads);
         if (issilver)
-            OpenGL::GL.Color3(ArbitraryRedshiftBasedColor(ro,universe.bro));
+            OpenGL.GL.Color3(ArbitraryRedshiftBasedColor(ro,universe.bro));
         else
-            OpenGL::GL.Color3(Color.Blue);
+            OpenGL.GL.Color3(Color.Blue);
 
         // front
-        OpenGL::GL.Vertex3(x - size, y - size, z + size);
-        OpenGL::GL.Vertex3(x - size, y + size, z + size);
-        OpenGL::GL.Vertex3(x + size, y + size, z + size);
-        OpenGL::GL.Vertex3(x + size, y - size, z + size);
+        OpenGL.GL.Vertex3(x - size, y - size, z + size);
+        OpenGL.GL.Vertex3(x - size, y + size, z + size);
+        OpenGL.GL.Vertex3(x + size, y + size, z + size);
+        OpenGL.GL.Vertex3(x + size, y - size, z + size);
 
         // right
-        OpenGL::GL.Vertex3(x + size, y - size, z + size);
-        OpenGL::GL.Vertex3(x + size, y + size, z + size);
-        OpenGL::GL.Vertex3(x + size, y + size, z - size);
-        OpenGL::GL.Vertex3(x + size, y - size, z - size);
+        OpenGL.GL.Vertex3(x + size, y - size, z + size);
+        OpenGL.GL.Vertex3(x + size, y + size, z + size);
+        OpenGL.GL.Vertex3(x + size, y + size, z - size);
+        OpenGL.GL.Vertex3(x + size, y - size, z - size);
 
         // bottom
-        OpenGL::GL.Vertex3(x + size, y - size, z - size);
-        OpenGL::GL.Vertex3(x + size, y - size, z + size);
-        OpenGL::GL.Vertex3(x - size, y - size, z + size);
-        OpenGL::GL.Vertex3(x - size, y - size, z - size);
+        OpenGL.GL.Vertex3(x + size, y - size, z - size);
+        OpenGL.GL.Vertex3(x + size, y - size, z + size);
+        OpenGL.GL.Vertex3(x - size, y - size, z + size);
+        OpenGL.GL.Vertex3(x - size, y - size, z - size);
 
         // left
-        OpenGL::GL.Vertex3(x - size, y - size, z - size);
-        OpenGL::GL.Vertex3(x - size, y - size, z + size);
-        OpenGL::GL.Vertex3(x - size, y + size, z + size);
-        OpenGL::GL.Vertex3(x - size, y + size, z - size);
+        OpenGL.GL.Vertex3(x - size, y - size, z - size);
+        OpenGL.GL.Vertex3(x - size, y - size, z + size);
+        OpenGL.GL.Vertex3(x - size, y + size, z + size);
+        OpenGL.GL.Vertex3(x - size, y + size, z - size);
 
         // top
-        OpenGL::GL.Vertex3(x - size, y + size, z - size);
-        OpenGL::GL.Vertex3(x - size, y + size, z + size);
-        OpenGL::GL.Vertex3(x + size, y + size, z + size);
-        OpenGL::GL.Vertex3(x + size, y + size, z - size);
+        OpenGL.GL.Vertex3(x - size, y + size, z - size);
+        OpenGL.GL.Vertex3(x - size, y + size, z + size);
+        OpenGL.GL.Vertex3(x + size, y + size, z + size);
+        OpenGL.GL.Vertex3(x + size, y + size, z - size);
 
         // back
-        OpenGL::GL.Vertex3(x + size, y + size, z - size);
-        OpenGL::GL.Vertex3(x + size, y - size, z - size);
-        OpenGL::GL.Vertex3(x - size, y - size, z - size);
-        OpenGL::GL.Vertex3(x - size, y + size, z - size);
+        OpenGL.GL.Vertex3(x + size, y + size, z - size);
+        OpenGL.GL.Vertex3(x + size, y - size, z - size);
+        OpenGL.GL.Vertex3(x - size, y - size, z - size);
+        OpenGL.GL.Vertex3(x - size, y + size, z - size);
 
-        OpenGL::GL.End();
+        OpenGL.GL.End();
     }
+
 
     private System.Drawing.Color ArbitraryRedshiftBasedColor(CoordinateEngine.RelativisticObject dude, CoordinateEngine.RelativisticObject reference)
     {
@@ -244,6 +257,40 @@ public class Canvas : GameWindow
         }else{//z<0.0
             return System.Drawing.Color.FromArgb(0,(int)(255*(1-z/lowerlimit)),(int)(z/lowerlimit*255));
         }
+    }
+
+
+    private void DrawHUD()
+    {
+        // Switch to orthographic.
+        OpenGL.GL.Disable(OpenGL.EnableCap.DepthTest);
+        OpenGL.GL.MatrixMode(OpenGL.MatrixMode.Projection);
+        OpenGL.GL.PushMatrix();
+        OpenGL.GL.LoadIdentity();
+        OpenGL.GL.Ortho(0, Width, Height, 0, -5, 1);
+        OpenGL.GL.MatrixMode(OpenGL.MatrixMode.Modelview);
+        OpenGL.GL.LoadIdentity();
+
+        if (frame_count > 0 && frame_count % FPS_WINDOW == 0) {
+            int total_ms = 0;
+            foreach (int i in frame_ticks) {
+                total_ms += i;
+            }
+            fps = (int)(FPS_WINDOW / ((double)total_ms / 1000));
+        }
+        string fps_str = "...";
+        if (fps >= 0) {
+            fps_str = fps.ToString();
+        }
+        Graphics.TextPrinter printer = new Graphics.TextPrinter();
+        Font font = new Font(FontFamily.GenericSerif, 12);
+        printer.Print("FPS: " + fps_str, font, Color.White, new RectangleF(50, 50, 200, 50));
+
+        // Switch back.
+        OpenGL.GL.Enable(OpenGL.EnableCap.DepthTest);
+        OpenGL.GL.MatrixMode(OpenGL.MatrixMode.Projection);
+        OpenGL.GL.PopMatrix();
+        OpenGL.GL.MatrixMode(OpenGL.MatrixMode.Modelview);
     }
 }
 
