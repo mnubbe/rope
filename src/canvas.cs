@@ -284,7 +284,7 @@ public class Canvas : GameWindow
         }
         OpenTK.Graphics.TextPrinter printer = new OpenTK.Graphics.TextPrinter();
         Font font = new Font(FontFamily.GenericSerif, 12);
-        printer.Print("FPS: " + fps_str, font, Color.White, new RectangleF(50, 50, 50.01f, 200));
+        printer.Print("FPS: " + fps_str, font, Color.White, new RectangleF(50, 50, 300, 300));
 
         // Switch back.
         GL.Enable(EnableCap.DepthTest);

@@ -30,14 +30,16 @@ public class Rope
     public void EngineThread ()
     {
         int tick = 0;
+        double interval;
         Random r = new Random();
         universe.UpdateTimes();
         while (true) {
-            universe.WaitForNextTick(TimeSpan.FromMilliseconds(20));
+            interval = universe.WaitForNextTick(TimeSpan.FromMilliseconds(20))/1000.0;
+            Console.WriteLine(interval);
             lock (objs) {
                 universe.UpdateDudes ();
                 universe.UpdateBro();
-                universe.universe_time += 0.020*universe.bro.gamma;
+                universe.universe_time += interval*universe.bro.gamma;
 
                 if (tick % 60 == 0) {
                     double new_x = r.NextDouble() * 2 - 2;

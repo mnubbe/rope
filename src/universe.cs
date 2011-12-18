@@ -34,7 +34,7 @@ public class Universe
     }
 
     private static class DemoConsts{
-        public static int    array_size = 60;
+        public static int    array_size = 40;
         public static double speed = 0.1;
         public static double spacing = 0.1;
         public static double radius = 1/Math.PI/2;
@@ -92,14 +92,18 @@ public class Universe
         bro.updatePositionByDrifting(universe_time);
     }
 
-    public void UpdateTimes()
+    //Returns the time (in milliseconds) that has passed since current_frame was last updated
+    public double UpdateTimes()
     {
+        double answer = (current_frame.Subtract(DateTime.Now)).TotalMilliseconds;
         current_frame = DateTime.Now;
         elapsed_time  = current_frame.Subtract(start_time);
+        return answer;
     }
 
     //Waits for the frame_interval to have elapsed since the last UpdateTimes() call or WaitForNextTick(...) call in system time before returning.
-    public void WaitForNextTick(TimeSpan frame_interval, int millisec_resolution = 1)
+    //Returns the time (in milliseconds) that has passed since current_frame was last updated
+    public double WaitForNextTick(TimeSpan frame_interval, int millisec_resolution = 1)
     {
         DateTime target = current_frame.Add(frame_interval);
         bool we_are_not_behind = (target>DateTime.Now);
@@ -110,8 +114,9 @@ public class Universe
         if(we_are_not_behind){
             current_frame = current_frame.Add(frame_interval);
             elapsed_time  = current_frame.Subtract(start_time);
+            return (double)frame_interval.Milliseconds;
         }else{//we are behind schedule, update times to whatever the current time is
-            UpdateTimes();
+            return UpdateTimes();
         }
     }
 }
