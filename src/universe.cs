@@ -41,12 +41,15 @@ public class Universe
         public static double x_center = 0.0;
         public static double y_center = 0.0;
         public static double phase = 0.0;//Adds a phase to the circle progression.  Math.PI/2 per quarter rotation
+        //Note: just because at universe_t=0 the things should appear somewhere does not mean they appear there.
+        //They will start wherever they should for a given time delay to the observer
     }
     //Populates the dudes, as a hard-coded demo
     public void InitDemo ()
     {
         for (int i=0; i<DemoConsts.array_size; i++) {
             for (int j=0; j<DemoConsts.array_size; j++) {
+                //This mess of things at 0,0,0 sorts itself out after a few frames using UpdateDudes(), don't worry
                 CoordinateEngine.RelativisticObject new_guy = new CoordinateEngine.RelativisticObject(0,0,0);
 
                 new_guy.vrms = DemoConsts.speed;
@@ -56,7 +59,7 @@ public class Universe
                 }
                 new_guy.gamma = new_gamma;
 
-                dudes.Add(new_guy);//This mess of things at 0,0,0 sorts itself out after a few frames using UpdateDudes(), don't worry
+                dudes.Add(new_guy);
             }
         }
     }

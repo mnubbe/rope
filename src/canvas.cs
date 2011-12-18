@@ -18,7 +18,8 @@ public class Canvas : GameWindow
 {
     //Constants
     private const float bro_acceleration = 0.9f;
-    private const int FPS_WINDOW = 150;
+    private const int FPS_WINDOW = 30;
+    private const int LINE_SPACING = 50;
 
     // Indices.
     private const int _x = 0;
@@ -27,9 +28,14 @@ public class Canvas : GameWindow
 
     private Universe universe;
     private rope.camera m_camera;
+
+    //HUD related
     private RingBuffer<int> frame_ticks = new RingBuffer<int>(FPS_WINDOW);
     private long frame_count = 0;
     private int fps = -1;
+    private int linenumber = 0;
+    private OpenTK.Graphics.TextPrinter printer;
+    private Font font = new Font(FontFamily.GenericSerif, 12);
 
 
     /// <param name="u">A Universe to display.</param>
@@ -69,64 +75,86 @@ public class Canvas : GameWindow
 
         // Handle input.
 
+        //Movement modifier
+        float modifier = 1.0f;
+        if (Keyboard[Key.LShift]){//for precise positioning
+            modifier /=5;
+        }
+        if (Keyboard[Key.LControl]){//ENGAGE WARP DRIVE
+            modifier *=5;
+        }
+
         // Camera lateral movement
         if (Keyboard[Key.W]) {
             //m_camera.Fly((float)e.Time,0,0);
             universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,
-                CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.lookat_vector,(float)e.Time*bro_acceleration)));
+                CoordinateEngine.toDoubleArray(Vector3.Multiply(
+                m_camera.lookat_vector,(float)e.Time*bro_acceleration*modifier)));
         }
         if (Keyboard[Key.A]) {
             //m_camera.Fly(0,0,(float)e.Time);
             universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,
-                CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.left_vector,(float)e.Time*bro_acceleration)));
+                CoordinateEngine.toDoubleArray(Vector3.Multiply(
+                m_camera.left_vector,(float)e.Time*bro_acceleration*modifier)));
         }
         if (Keyboard[Key.S]) {
             //m_camera.Fly(-(float)e.Time,0,0);
             universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,
-                CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.lookat_vector,(float)e.Time*(-bro_acceleration))));
+                CoordinateEngine.toDoubleArray(Vector3.Multiply(
+                m_camera.lookat_vector,(float)e.Time*(-bro_acceleration*modifier))));
         }
         if (Keyboard[Key.D]) {
             //m_camera.Fly(0,0,-(float)e.Time);
             universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,
-                CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.left_vector,(float)e.Time*(-bro_acceleration))));
+                CoordinateEngine.toDoubleArray(Vector3.Multiply(
+                m_camera.left_vector,(float)e.Time*(-bro_acceleration*modifier))));
         }
         if (Keyboard[Key.E]) {
             //m_camera.Fly(0,(float)e.Time,0);
             universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,
-                CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.orientation_vector,(float)e.Time*bro_acceleration)));
+                CoordinateEngine.toDoubleArray(Vector3.Multiply(
+                m_camera.orientation_vector,(float)e.Time*bro_acceleration*modifier)));
         }
         if (Keyboard[Key.C]) {
             //m_camera.Fly(0,-(float)e.Time,0);
             universe.bro.v = CoordinateEngine.velocitySum(universe.bro.v,
-                CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.orientation_vector,(float)e.Time*(-bro_acceleration))));
+                CoordinateEngine.toDoubleArray(Vector3.Multiply(
+                m_camera.orientation_vector,(float)e.Time*(-bro_acceleration*modifier))));
         }
 
+        //Brakes, for convenience
+        //Note, this is an instant stop
+        if (Keyboard[Key.BackSpace]){
+            for(int i=0;i<universe.bro.v.Length;i++){
+                universe.bro.v[i] = 0;
+            }
+        }
 
         //Camera rotation
         //Will work for small angles, deviating at larger ones
         if (Keyboard[Key.Right]||Keyboard[Key.Keypad6]) {
-            m_camera.ShiftDirection(0,-(float)e.Time,0);
+            m_camera.ShiftDirection(0,-(float)e.Time*modifier,0);
         }
         if (Keyboard[Key.Left]||Keyboard[Key.Keypad4]) {
-            m_camera.ShiftDirection(0,(float)e.Time,0);
+            m_camera.ShiftDirection(0,(float)e.Time*modifier,0);
         }
         if (Keyboard[Key.Down]||Keyboard[Key.Keypad2]) {//up, I wanted inverted controls for testing
-            m_camera.ShiftDirection((float)e.Time,0,0);
+            m_camera.ShiftDirection((float)e.Time*modifier,0,0);
         }
         if (Keyboard[Key.Up]||Keyboard[Key.Keypad8]) {//down, I wanted inverted controls for testing
-            m_camera.ShiftDirection(-(float)e.Time,0,0);
+            m_camera.ShiftDirection(-(float)e.Time*modifier,0,0);
         }
         if (Keyboard[Key.Home]||Keyboard[Key.Keypad7]) {//Roll left
-            m_camera.ShiftDirection(0,0,(float)e.Time);
+            m_camera.ShiftDirection(0,0,(float)e.Time*modifier);
         }
         if (Keyboard[Key.PageUp]||Keyboard[Key.Keypad9]) {//Roll right
-            m_camera.ShiftDirection(0,0,-(float)e.Time);
+            m_camera.ShiftDirection(0,0,-(float)e.Time*modifier);
         }
 
         m_camera.NormalizeDirection();//Should be called every time direction is messed with
 
         lock(universe.bro){
-            universe.bro.updateGamma();  //Drifting astronaut mode
+            universe.bro.updateGamma();  //Drifting astronaut mode if used alone
             //universe.bro.v = CoordinateEngine.toDoubleArray(Vector3.Multiply(m_camera.lookat_vector,(float)universe.bro.vrms));  //Airplane with no brake mode
         }
         //Console.WriteLine("{0}, ({1},{2},{3})",universe.bro.gamma, universe.bro.v[0],universe.bro.v[1],universe.bro.v[2]);
@@ -144,6 +172,7 @@ public class Canvas : GameWindow
 
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
+        //GL.DepthRange(0.0001,100000);//Defines min and max draw distances?, NOT working
         GL.MatrixMode(MatrixMode.Modelview);
 
         m_camera.UpdateCameraView();
@@ -183,7 +212,7 @@ public class Canvas : GameWindow
         double z = ro.x[_z];
 
         //double size = .01*Math.Sqrt (CoordinateEngine.RMS(universe.bro.x));
-        double size = 0.01;
+        double size = 0.042;//Diameter of the Earth if t=seconds
 
         GL.Begin(BeginMode.Quads);
         if (issilver)
@@ -282,15 +311,28 @@ public class Canvas : GameWindow
         if (fps >= 0) {
             fps_str = fps.ToString();
         }
-        OpenTK.Graphics.TextPrinter printer = new OpenTK.Graphics.TextPrinter();
-        Font font = new Font(FontFamily.GenericSerif, 12);
-        printer.Print("FPS: " + fps_str, font, Color.White, new RectangleF(50, 50, 300, 300));
+        linenumber = 0;
+        printer = new OpenTK.Graphics.TextPrinter();
+        HUDprintLine("FPS: " + fps_str);
+        HUDprintLine(String.Format("Gamma: {0}",universe.bro.gamma));
+        HUDprintLine(String.Format("Gamma*Vrms: {0}",universe.bro.gamma*universe.bro.vrms));
+        HUDprintLine(String.Format("Your watch: {0}",universe.bro.t_object));
+        HUDprintLine(String.Format("Wall clock: {0}",universe.universe_time));
+        HUDprintLine(String.Format("Position: {0},{1},{2}",universe.bro.x[0],universe.bro.x[1],universe.bro.x[2]));
+
 
         // Switch back.
         GL.Enable(EnableCap.DepthTest);
         GL.MatrixMode(MatrixMode.Projection);
         GL.PopMatrix();
         GL.MatrixMode(MatrixMode.Modelview);
+    }
+
+    private void HUDprintLine(string text)
+    {
+        printer.Print(text,
+                      font,Color.White, new RectangleF(50,50+25*linenumber,300,50));
+        linenumber++;
     }
 }
 

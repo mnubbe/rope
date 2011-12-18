@@ -35,7 +35,7 @@ public class Rope
         universe.UpdateTimes();
         while (true) {
             interval = universe.WaitForNextTick(TimeSpan.FromMilliseconds(20))/1000.0;
-            Console.WriteLine(interval);
+            //Console.WriteLine(interval);
             lock (objs) {
                 universe.UpdateDudes ();
                 universe.UpdateBro();
@@ -51,7 +51,7 @@ public class Rope
                 List<CoordinateEngine.RelativisticObject> to_remove = new List<CoordinateEngine.RelativisticObject>();
                 foreach (CoordinateEngine.RelativisticObject obj in objs) {
                     obj.x[0] += .02;
-                    if (obj.x[0] > 30) {
+                    if (obj.x[0] > 40) {
                         to_remove.Add(obj);
                     }
                 }
