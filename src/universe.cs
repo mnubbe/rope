@@ -34,7 +34,7 @@ public class Universe
     }
 
     private static class DemoConsts{
-        public static int    array_size = 10;
+        public static int    array_size = 60;
         public static double speed = 0.1;
         public static double spacing = 0.1;
         public static double radius = 1/Math.PI/2;
@@ -98,13 +98,20 @@ public class Universe
         elapsed_time  = current_frame.Subtract(start_time);
     }
 
-    //Waits for the frame_interval to have elapsed since the last UpdateTimes() call in system time before returning.
-    public void WaitForNextTick(TimeSpan frame_interval, int microsec_resolution = 1000)
+    //Waits for the frame_interval to have elapsed since the last UpdateTimes() call or WaitForNextTick(...) call in system time before returning.
+    public void WaitForNextTick(TimeSpan frame_interval, int millisec_resolution = 1)
     {
         DateTime target = current_frame.Add(frame_interval);
+        bool we_are_not_behind = (target>DateTime.Now);
         while(target>DateTime.Now)
         {
-            Threading.Sleep(50);
+            System.Threading.Thread.Sleep(millisec_resolution);
+        }
+        if(we_are_not_behind){
+            current_frame = current_frame.Add(frame_interval);
+            elapsed_time  = current_frame.Subtract(start_time);
+        }else{//we are behind schedule, update times to whatever the current time is
+            UpdateTimes();
         }
     }
 }

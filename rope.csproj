@@ -24,6 +24,7 @@
     <Compile Include="src\rope.cs" />
     <Compile Include="src\universe.cs" />
     <Compile Include="src\camera.cs" />
+    <Compile Include="src\ringbuffer.cs" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
@@ -54,5 +55,11 @@
       <HintPath>libs\opentk\OpenTK.dll</HintPath>
     </Reference>
     <Reference Include="System.Drawing" />
+    <Reference Include="OpenTK.Compatibility">
+      <HintPath>libs\opentk\OpenTK.Compatibility.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenTK.GLControl">
+      <HintPath>libs\opentk\OpenTK.GLControl.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>

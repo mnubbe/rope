@@ -31,7 +31,9 @@ public class Rope
     {
         int tick = 0;
         Random r = new Random();
+        universe.UpdateTimes();
         while (true) {
+            universe.WaitForNextTick(TimeSpan.FromMilliseconds(20));
             lock (objs) {
                 universe.UpdateDudes ();
                 universe.UpdateBro();
@@ -57,7 +59,6 @@ public class Rope
                 }
             }
             tick++;
-            Thread.Sleep (20);
         }
     }
 
