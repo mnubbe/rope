@@ -25,6 +25,7 @@ public class Universe
         universe_time = 0;
         InitDemo ();
         bro.updateGamma();
+        start_time = DateTime.Now;
     }
 
     public List<CoordinateEngine.RelativisticObject> GetNPCs()
@@ -89,6 +90,22 @@ public class Universe
     {
         bro.updateGamma();
         bro.updatePositionByDrifting(universe_time);
+    }
+
+    public void UpdateTimes()
+    {
+        current_frame = DateTime.Now;
+        elapsed_time  = current_frame.Subtract(start_time);
+    }
+
+    //Waits for the frame_interval to have elapsed since the last UpdateTimes() call in system time before returning.
+    public void WaitForNextTick(TimeSpan frame_interval, int microsec_resolution = 1000)
+    {
+        DateTime target = current_frame.Add(frame_interval);
+        while(target>DateTime.Now)
+        {
+            Threading.Sleep(50);
+        }
     }
 }
 
