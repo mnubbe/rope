@@ -271,10 +271,14 @@ public class Canvas : GameWindow
         GL.MatrixMode(MatrixMode.Modelview);
         GL.LoadIdentity();
 
-        string fps_str = ((int)stats.GetFPS(FPS_TAG)).ToString();
+        string fps_str = String.Format(
+                "graphics: {0} FPS\n" +
+                "physics: {1} FPS",
+                ((int)stats.GetFPS(FPS_TAG)).ToString(),
+                ((int)stats.GetFPS("Physics")).ToString());
         OpenTK.Graphics.TextPrinter printer = new OpenTK.Graphics.TextPrinter();
         Font font = new Font(FontFamily.GenericSerif, 12);
-        printer.Print("FPS: " + fps_str, font, Color.White, new RectangleF(50, 50, 200, 50));
+        printer.Print(fps_str, font, Color.White, new RectangleF(50, 50, 500, 60));
 
         // Switch back.
         GL.Enable(EnableCap.DepthTest);

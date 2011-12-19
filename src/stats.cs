@@ -9,6 +9,9 @@ using ClassLibrary1.Collections.Generic;
 
 namespace Statistics
 {
+    /// <summary>
+    /// Singleton bean-counter class. Currently only tracks frames per second.
+    /// </summary>
     class Stats
     {
         private static Stats instance;
@@ -73,7 +76,8 @@ namespace Statistics
                 }
             }
 
-            return (double)(values / (((double)sum) / 1000));
+            double framerate = (double)(values / (((double)sum) / 1000));
+            return framerate;
         }
     }
 
