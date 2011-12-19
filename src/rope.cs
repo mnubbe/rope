@@ -40,6 +40,7 @@ public class Rope
                 universe.UpdateDudes ();
                 universe.UpdateBro();
                 universe.universe_time += interval*universe.bro.gamma;
+                //universe.universe_time += 0.020*universe.bro.gamma;
 
                 if (tick % 60 == 0) {
                     double new_x = r.NextDouble() * 2 - 2;
@@ -60,6 +61,7 @@ public class Rope
                     objs.Remove(obj);
                 }
             }
+            //Thread.Sleep(20);
             tick++;
         }
     }

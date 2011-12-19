@@ -43,6 +43,7 @@ public class Canvas : GameWindow
     {
         universe = u;
         m_camera = new rope.camera (CoordinateEngine.toVector3(universe.bro.x), new Vector3(0,0,-1), new Vector3(0,1,0));
+        printer = new OpenTK.Graphics.TextPrinter();
     }
 
 
@@ -172,7 +173,6 @@ public class Canvas : GameWindow
 
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-        //GL.DepthRange(0.0001,100000);//Defines min and max draw distances?, NOT working
         GL.MatrixMode(MatrixMode.Modelview);
 
         m_camera.UpdateCameraView();
@@ -312,26 +312,30 @@ public class Canvas : GameWindow
             fps_str = fps.ToString();
         }
         linenumber = 0;
-        printer = new OpenTK.Graphics.TextPrinter();
+
+        //Note about printer: mono seems to have a memory leak from this unless it is manually .Dispose() 'd of
+        //Or only a finite number of instances are made (1 from constructor seems fine)
         HUDprintLine("FPS: " + fps_str);
         HUDprintLine(String.Format("Gamma: {0}",universe.bro.gamma));
         HUDprintLine(String.Format("Gamma*Vrms: {0}",universe.bro.gamma*universe.bro.vrms));
         HUDprintLine(String.Format("Your watch: {0}",universe.bro.t_object));
         HUDprintLine(String.Format("Wall clock: {0}",universe.universe_time));
-        HUDprintLine(String.Format("Position: {0},{1},{2}",universe.bro.x[0],universe.bro.x[1],universe.bro.x[2]));
-
+        HUDprintLine(String.Format("Position: \n{0}\n{1}\n{2}",universe.bro.x[0],universe.bro.x[1],universe.bro.x[2]));
 
         // Switch back.
         GL.Enable(EnableCap.DepthTest);
         GL.MatrixMode(MatrixMode.Projection);
         GL.PopMatrix();
         GL.MatrixMode(MatrixMode.Modelview);
+        //GL.DepthRange(0.0001,100000);//Defines min and max draw distances?, NOT working
     }
 
     private void HUDprintLine(string text)
     {
-        printer.Print(text,
-                      font,Color.White, new RectangleF(50,50+25*linenumber,300,50));
+        {
+            RectangleF m_rect = new RectangleF(50,50+25*linenumber,300,50);
+            printer.Print(text,font,Color.White,m_rect);
+        }
         linenumber++;
     }
 }
