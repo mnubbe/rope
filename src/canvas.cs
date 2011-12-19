@@ -31,8 +31,6 @@ public class Canvas : GameWindow
     private rope.camera m_camera;
 
     //HUD related
-    private long frame_count = 0;
-    private int fps = -1;
     private int linenumber = 0;
     private OpenTK.Graphics.TextPrinter printer;
     private Font font = new Font(FontFamily.GenericSerif, 12);
