@@ -12,6 +12,7 @@ using OpenTK.Input;
 using OpenTK.Graphics.OpenGL;
 
 using ClassLibrary1.Collections.Generic;
+using Statistics;
 
 
 public class Canvas : GameWindow
@@ -139,7 +140,7 @@ public class Canvas : GameWindow
 
     protected override void OnRenderFrame (FrameEventArgs e)
     {
-        DateTime start = DateTime.Now;
+        Tick tick = new Tick();
         base.OnRenderFrame(e);
 
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
@@ -160,7 +161,7 @@ public class Canvas : GameWindow
 
         DrawHUD();
 
-        fps_ticks.Add((DateTime.Now - start).Milliseconds);
+        fps_ticks.Add(tick.Tock());
 
         this.SwapBuffers();
         Thread.Sleep(1);
