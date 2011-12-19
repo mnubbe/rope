@@ -98,7 +98,7 @@ public class Universe
     //Returns the time (in milliseconds) that has passed since current_frame was last updated
     public double UpdateTimes()
     {
-        double answer = (current_frame.Subtract(DateTime.Now)).TotalMilliseconds;
+        double answer = (DateTime.Now.Subtract(current_frame)).TotalMilliseconds;
         current_frame = DateTime.Now;
         elapsed_time  = current_frame.Subtract(start_time);
         return answer;
