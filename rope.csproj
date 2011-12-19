@@ -25,6 +25,7 @@
     <Compile Include="src\universe.cs" />
     <Compile Include="src\camera.cs" />
     <Compile Include="src\ringbuffer.cs" />
+    <Compile Include="src\stats.cs" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>

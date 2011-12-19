@@ -12,6 +12,7 @@ using OpenTK.Input;
 using OpenTK.Graphics.OpenGL;
 
 using ClassLibrary1.Collections.Generic;
+using Statistics;
 
 
 public class Canvas : GameWindow
@@ -20,22 +21,23 @@ public class Canvas : GameWindow
     private const float bro_acceleration = 0.9f;
     private const int FPS_WINDOW = 30;
     private const int LINE_SPACING = 50;
+    public const string FPS_TAG = "Render";
 
     // Indices.
     private const int _x = 0;
     private const int _y = 1;
     private const int _z = 2;
-
     private Universe universe;
     private rope.camera m_camera;
 
     //HUD related
-    private RingBuffer<int> frame_ticks = new RingBuffer<int>(FPS_WINDOW);
     private long frame_count = 0;
     private int fps = -1;
     private int linenumber = 0;
     private OpenTK.Graphics.TextPrinter printer;
     private Font font = new Font(FontFamily.GenericSerif, 12);
+    private Stats stats;
+    private RingBuffer<int> fps_ticks;
 
 
     /// <param name="u">A Universe to display.</param>
@@ -44,6 +46,8 @@ public class Canvas : GameWindow
         universe = u;
         m_camera = new rope.camera (CoordinateEngine.toVector3(universe.bro.x), new Vector3(0,0,-1), new Vector3(0,1,0));
         printer = new OpenTK.Graphics.TextPrinter();
+        stats = Stats.Instance();
+        fps_ticks = stats.GetFrameTickBuffer(FPS_TAG);
     }
 
 
@@ -168,7 +172,7 @@ public class Canvas : GameWindow
 
     protected override void OnRenderFrame (FrameEventArgs e)
     {
-        DateTime start = DateTime.Now;
+        Tick tick = new Tick();
         base.OnRenderFrame(e);
 
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
@@ -189,8 +193,7 @@ public class Canvas : GameWindow
 
         DrawHUD();
 
-        frame_count++;
-        frame_ticks.Add((DateTime.Now - start).Milliseconds);
+        fps_ticks.Add(tick.Tock());
 
         this.SwapBuffers();
         Thread.Sleep(1);
@@ -300,22 +303,17 @@ public class Canvas : GameWindow
         GL.MatrixMode(MatrixMode.Modelview);
         GL.LoadIdentity();
 
-        if (frame_count > 0 && frame_count % FPS_WINDOW == 0) {
-            int total_ms = 0;
-            foreach (int i in frame_ticks) {
-                total_ms += i;
-            }
-            fps = (int)(FPS_WINDOW / ((double)total_ms / 1000));
-        }
-        string fps_str = "...";
-        if (fps >= 0) {
-            fps_str = fps.ToString();
-        }
-        linenumber = 0;
+        string gfps_str = String.Format("graphics: {0} FPS",
+            ((int)stats.GetFPS(FPS_TAG)));
+        string pfps_str = String.Format("physics: {0} FPS",
+            ((int)stats.GetFPS("Physics")));
+
 
         //Note about printer: mono seems to have a memory leak from this unless it is manually .Dispose() 'd of
         //Or only a finite number of instances are made (1 from constructor seems fine)
-        HUDprintLine("FPS: " + fps_str);
+        linenumber=0;
+        HUDprintLine(gfps_str);
+        HUDprintLine(pfps_str);
         HUDprintLine(String.Format("Gamma: {0}",universe.bro.gamma));
         HUDprintLine(String.Format("Gamma*Vrms: {0}",universe.bro.gamma*universe.bro.vrms));
         HUDprintLine(String.Format("Your watch: {0}",universe.bro.t_object));
@@ -333,7 +331,7 @@ public class Canvas : GameWindow
     private void HUDprintLine(string text)
     {
         {
-            RectangleF m_rect = new RectangleF(50,50+25*linenumber,300,50);
+            RectangleF m_rect = new RectangleF(50,50+25*linenumber,500,50);
             printer.Print(text,font,Color.White,m_rect);
         }
         linenumber++;
