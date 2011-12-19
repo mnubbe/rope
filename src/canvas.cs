@@ -18,18 +18,16 @@ public class Canvas : GameWindow
 {
     //Constants
     private const float bro_acceleration = 0.9f;
-    private const int FPS_WINDOW = 150;
+    public const string FPS_TAG = "Render";
 
     // Indices.
     private const int _x = 0;
     private const int _y = 1;
     private const int _z = 2;
-
     private Universe universe;
     private rope.camera m_camera;
-    private RingBuffer<int> frame_ticks = new RingBuffer<int>(FPS_WINDOW);
-    private long frame_count = 0;
-    private int fps = -1;
+    private Stats stats;
+    private RingBuffer<int> fps_ticks;
 
 
     /// <param name="u">A Universe to display.</param>
@@ -37,6 +35,8 @@ public class Canvas : GameWindow
     {
         universe = u;
         m_camera = new rope.camera (CoordinateEngine.toVector3(universe.bro.x), new Vector3(0,0,-1), new Vector3(0,1,0));
+        stats = Stats.Instance();
+        fps_ticks = stats.GetFrameTickBuffer(FPS_TAG);
     }
 
 
@@ -160,8 +160,7 @@ public class Canvas : GameWindow
 
         DrawHUD();
 
-        frame_count++;
-        frame_ticks.Add((DateTime.Now - start).Milliseconds);
+        fps_ticks.Add((DateTime.Now - start).Milliseconds);
 
         this.SwapBuffers();
         Thread.Sleep(1);
@@ -271,20 +270,10 @@ public class Canvas : GameWindow
         GL.MatrixMode(MatrixMode.Modelview);
         GL.LoadIdentity();
 
-        if (frame_count > 0 && frame_count % FPS_WINDOW == 0) {
-            int total_ms = 0;
-            foreach (int i in frame_ticks) {
-                total_ms += i;
-            }
-            fps = (int)(FPS_WINDOW / ((double)total_ms / 1000));
-        }
-        string fps_str = "...";
-        if (fps >= 0) {
-            fps_str = fps.ToString();
-        }
+        string fps_str = ((int)stats.GetFPS(FPS_TAG)).ToString();
         OpenTK.Graphics.TextPrinter printer = new OpenTK.Graphics.TextPrinter();
         Font font = new Font(FontFamily.GenericSerif, 12);
-        printer.Print("FPS: " + fps_str, font, Color.White, new RectangleF(50, 50, 50.01f, 200));
+        printer.Print("FPS: " + fps_str, font, Color.White, new RectangleF(50, 50, 200, 50));
 
         // Switch back.
         GL.Enable(EnableCap.DepthTest);
