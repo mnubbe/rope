@@ -1,7 +1,8 @@
 ROPE (Relativistic Oriented Physics Engine) is an attempt to convey the effects of relativistic acceleration and travel for a camera at short distances.  More concisely, if you could accelerate to 0.9c, what do you see differently than what you might expect?
 
-Status: 2D - non-interactive demo created, otherwise early development
+Status: 3D - somewhat interactive demo created, otherwise early development
 
+Observable phenomena: Twin paradox, redshift, presumably more
 
 
 Keys:
