@@ -69,10 +69,12 @@ namespace Statistics
 
             int sum = 0;
             int values = 0;
-            foreach (int i in fps[name]) {
-                if (i >= 0) {
-                    sum += i;
-                    values++;
+            lock(fps[name]){//Interestingly this is not enough...
+                foreach (int i in fps[name]) {//Exception was thrown by ringbuffer.cs:141 from this...
+                    if (i >= 0) {
+                        sum += i;
+                        values++;
+                    }
                 }
             }
 

@@ -325,7 +325,6 @@ public class Canvas : GameWindow
         GL.MatrixMode(MatrixMode.Projection);
         GL.PopMatrix();
         GL.MatrixMode(MatrixMode.Modelview);
-        //GL.DepthRange(0.0001,100000);//Defines min and max draw distances?, NOT working
     }
 
     private void HUDprintLine(string text)

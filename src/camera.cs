@@ -4,6 +4,7 @@ using OpenTK;
 //using OpenTK.Input;
 //using Graphics = OpenTK.Graphics;
 using OpenGL = OpenTK.Graphics.OpenGL;
+using OpenTK.Graphics.OpenGL;
 
 namespace rope
 {
@@ -14,6 +15,13 @@ namespace rope
         const float default_rotation_speed = 1.0f;
         const float roll_speedup_factor    = 2.0f; //roll will happen this factor faster for palatability
         const float default_movement_speed = 1.0f;
+
+        //Field of view parameters
+        float FOV = 90.0f/180.0f*(float)Math.PI;//First part in degrees, width
+        float aspect_ratio = 9.0f/16.0f;
+        float znear = 0.01f;//If used like this, it is the minimum displayable distance.
+        //...And the switch for using the experimental camera that takes these into account
+        bool I_should_use_the_experimental_camera = true;
 
         //Variables
         //Position of the camera in space
@@ -50,10 +58,25 @@ namespace rope
             local_look_at = Matrix4.LookAt(
                 camera_position,
                 Vector3.Add(camera_position,lookat_vector),
-                //Vector3.Add(camera_position,orientation_vector)
                 orientation_vector
                 );
-            OpenGL::GL.LoadMatrix(ref local_look_at);
+
+
+            if(I_should_use_the_experimental_camera){
+                //See http://www.opentk.com/node/2083,
+                //http://www.opengl.org/resources/faq/technical/viewing.htm at 8.040
+                //For how this was all figured out
+                GL.MatrixMode(MatrixMode.Projection);
+                GL.LoadIdentity();
+                OpenTK.Matrix4 perspective = Matrix4.CreatePerspectiveOffCenter(-FOV*znear/2,FOV*znear/2,
+                                                                                -FOV*aspect_ratio*znear/2,FOV*aspect_ratio*znear/2,
+                                                                                znear,1000);
+                GL.MultMatrix(ref perspective);
+                GL.MatrixMode(MatrixMode.Modelview);
+                GL.LoadIdentity();
+            }
+            
+            GL.MultMatrix(ref local_look_at);
         }
 
         //See http://en.wikipedia.org/wiki/File:Rollpitchyawplain.png for direction definitions
