@@ -76,7 +76,7 @@ public class Universe
                 mytime = dude.observedUniverseTime (universe_time, bro);
                 dude.x[0] = DemoConsts.x_center + i*DemoConsts.spacing + DemoConsts.radius * Math.Cos(
                     DemoConsts.phase + mytime*DemoConsts.speed/DemoConsts.radius);
-                dude.x[1] = DemoConsts.x_center + j*DemoConsts.spacing + DemoConsts.radius * Math.Sin(
+                dude.x[1] = DemoConsts.y_center + j*DemoConsts.spacing + DemoConsts.radius * Math.Sin(
                     DemoConsts.phase + mytime*DemoConsts.speed/DemoConsts.radius);
                 dude.v[0] = (-1) * DemoConsts.speed * Math.Sin (
                     DemoConsts.phase + mytime*DemoConsts.speed/DemoConsts.radius);
