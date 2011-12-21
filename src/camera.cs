@@ -21,6 +21,7 @@ namespace rope
         float aspect_ratio = 9.0f/16.0f;
         float znear = 0.01f;//If used like this, it is the minimum displayable distance.
         //...And the switch for using the experimental camera that takes these into account
+        float zfar = 1000.0f;//Farthest observable object distance.  If made to big it affects the redering of near objects
         bool I_should_use_the_experimental_camera = true;
 
         //Variables
@@ -70,7 +71,7 @@ namespace rope
                 GL.LoadIdentity();
                 OpenTK.Matrix4 perspective = Matrix4.CreatePerspectiveOffCenter(-FOV*znear/2,FOV*znear/2,
                                                                                 -FOV*aspect_ratio*znear/2,FOV*aspect_ratio*znear/2,
-                                                                                znear,1000);
+                                                                                znear,zfar);
                 GL.MultMatrix(ref perspective);
                 GL.MatrixMode(MatrixMode.Modelview);
                 GL.LoadIdentity();
