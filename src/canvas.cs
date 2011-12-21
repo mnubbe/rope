@@ -320,6 +320,8 @@ public class Canvas : GameWindow
         HUDprintLine(String.Format("Wall clock: {0}",universe.universe_time));
         HUDprintLine(String.Format("Position: \n{0}\n{1}\n{2}",universe.bro.x[0],universe.bro.x[1],universe.bro.x[2]));
 
+        HUDdrawReticle();
+
         // Switch back.
         GL.Enable(EnableCap.DepthTest);
         GL.MatrixMode(MatrixMode.Projection);
@@ -334,6 +336,31 @@ public class Canvas : GameWindow
             printer.Print(text,font,Color.White,m_rect);
         }
         linenumber++;
+    }
+    private void HUDdrawReticle()
+    {
+        float msize = 30.0f;
+        float thick = 2.0f;
+        System.Drawing.Color reticle_color = Color.White;
+
+        GL.Color3(reticle_color);
+        GL.Begin(BeginMode.Quads);
+
+        //Go upper left, ur, lr,ll
+
+        //Horizontal "line"
+        GL.Vertex3((Width-msize)/2,(Height-thick)/2,0);
+        GL.Vertex3((Width+msize)/2,(Height-thick)/2,0);
+        GL.Vertex3((Width+msize)/2,(Height+thick)/2,0);
+        GL.Vertex3((Width-msize)/2,(Height+thick)/2,0);
+
+        //Vertical "line"
+        GL.Vertex3((Width-thick)/2,(Height-msize)/2,0);
+        GL.Vertex3((Width+thick)/2,(Height-msize)/2,0);
+        GL.Vertex3((Width+thick)/2,(Height+msize)/2,0);
+        GL.Vertex3((Width-thick)/2,(Height+msize)/2,0);
+
+        GL.End();
     }
 }
 
