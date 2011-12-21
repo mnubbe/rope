@@ -39,6 +39,13 @@ public class Canvas : GameWindow
     private Stats stats;
     private RingBuffer<int> fps_ticks;
 
+    //Reticle related
+
+    bool am_using_reticle = true;
+    float reticle_size = 30.0f;
+    float reticle_thickness = 2.0f;
+    System.Drawing.Color reticle_color = Color.White;
+
 
     /// <param name="u">A Universe to display.</param>
     public Canvas(Universe u) : base(1920, 1080, new OpenTK.Graphics.GraphicsMode(16, 16))
@@ -320,8 +327,10 @@ public class Canvas : GameWindow
         HUDprintLine(String.Format("Wall clock: {0}",universe.universe_time));
         HUDprintLine(String.Format("Position: \n{0}\n{1}\n{2}",universe.bro.x[0],universe.bro.x[1],universe.bro.x[2]));
 
-        HUDdrawReticle();
-
+        if(am_using_reticle){
+            HUDdrawReticle();
+        }
+        
         // Switch back.
         GL.Enable(EnableCap.DepthTest);
         GL.MatrixMode(MatrixMode.Projection);
@@ -339,26 +348,22 @@ public class Canvas : GameWindow
     }
     private void HUDdrawReticle()
     {
-        float msize = 30.0f;
-        float thick = 2.0f;
-        System.Drawing.Color reticle_color = Color.White;
-
         GL.Color3(reticle_color);
         GL.Begin(BeginMode.Quads);
 
         //Go upper left, ur, lr,ll
 
         //Horizontal "line"
-        GL.Vertex3((Width-msize)/2,(Height-thick)/2,0);
-        GL.Vertex3((Width+msize)/2,(Height-thick)/2,0);
-        GL.Vertex3((Width+msize)/2,(Height+thick)/2,0);
-        GL.Vertex3((Width-msize)/2,(Height+thick)/2,0);
+        GL.Vertex3((Width-reticle_size)/2,(Height-reticle_thickness)/2,0);
+        GL.Vertex3((Width+reticle_size)/2,(Height-reticle_thickness)/2,0);
+        GL.Vertex3((Width+reticle_size)/2,(Height+reticle_thickness)/2,0);
+        GL.Vertex3((Width-reticle_size)/2,(Height+reticle_thickness)/2,0);
 
         //Vertical "line"
-        GL.Vertex3((Width-thick)/2,(Height-msize)/2,0);
-        GL.Vertex3((Width+thick)/2,(Height-msize)/2,0);
-        GL.Vertex3((Width+thick)/2,(Height+msize)/2,0);
-        GL.Vertex3((Width-thick)/2,(Height+msize)/2,0);
+        GL.Vertex3((Width-reticle_thickness)/2,(Height-reticle_size)/2,0);
+        GL.Vertex3((Width+reticle_thickness)/2,(Height-reticle_size)/2,0);
+        GL.Vertex3((Width+reticle_thickness)/2,(Height+reticle_size)/2,0);
+        GL.Vertex3((Width-reticle_thickness)/2,(Height+reticle_size)/2,0);
 
         GL.End();
     }
