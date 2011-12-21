@@ -35,7 +35,6 @@ public class Canvas : GameWindow
     private OpenTK.Graphics.TextPrinter printer;
     private Font font = new Font(FontFamily.GenericSerif, 12);
     private Stats stats;
-    private RingBuffer<int> fps_ticks;
 
     //Reticle related
 
@@ -52,7 +51,7 @@ public class Canvas : GameWindow
         m_camera = new rope.camera (CoordinateEngine.toVector3(universe.bro.x), new Vector3(0,0,-1), new Vector3(0,1,0));
         printer = new OpenTK.Graphics.TextPrinter();
         stats = Stats.Instance();
-        fps_ticks = stats.GetFrameTickBuffer(FPS_TAG);
+        stats.AddValue(FPS_TAG, -1);
     }
 
 
@@ -198,7 +197,7 @@ public class Canvas : GameWindow
 
         DrawHUD();
 
-        fps_ticks.Add(tick.Tock());
+        stats.AddValue(FPS_TAG, tick.Tock());
 
         this.SwapBuffers();
         Thread.Sleep(1);
@@ -311,7 +310,7 @@ public class Canvas : GameWindow
         string gfps_str = String.Format("graphics: {0} FPS",
             ((int)stats.GetFPS(FPS_TAG)));
         string pfps_str = String.Format("physics: {0} FPS",
-            ((int)stats.GetFPS("Physics")));
+            ((int)stats.GetFPS("physics")));
 
 
         //Note about printer: mono seems to have a memory leak from this unless it is manually .Dispose() 'd of

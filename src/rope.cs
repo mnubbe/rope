@@ -31,7 +31,8 @@ public class Rope
 
     public void EngineThread ()
     {
-        RingBuffer<int> fps_ticks = Stats.Instance().GetFrameTickBuffer("Physics");
+        Stats stats = Stats.Instance();
+        stats.AddValue("physics", -1);
         int ticks = 0;
         double interval;
         Random r = new Random();
@@ -67,7 +68,7 @@ public class Rope
             }
             //Thread.Sleep(20);
             ticks++;
-            fps_ticks.Add(tick.Tock());
+            stats.AddValue("physics", tick.Tock());
         }
     }
 

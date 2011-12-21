@@ -30,16 +30,17 @@ namespace Statistics
 
 
         /// <summary>
-        /// Returns a RingBuffer for the given name. Callers should Add() the
-        /// number of ms it took them to render a frame each time they do so.
+        /// Registers one tick for the given name.
         /// </summary>
         /// <param name="name">A string identifying the caller.</param>
-        /// <returns>The RingBuffer for the passed name. May not be shared among
-        /// threads.</returns>
-        public RingBuffer<int> GetFrameTickBuffer(string name)
+        /// <param name="value">The new value.</param>
+        public void AddValue(string name, int val)
         {
-            if (fps.ContainsKey(name) == false) {
-                RingBuffer<int> rb = new RingBuffer<int>(FPS_WINDOW);
+            RingBuffer<int> rb;
+            if (fps.ContainsKey(name)) {
+                rb = fps[name];
+            } else {
+                rb = new RingBuffer<int>(FPS_WINDOW);
                 // Fill the RingBuffer with sentinel values so we don't have to
                 // do extra bookkeeping.
                 for (int i = 0; i < FPS_WINDOW; i++) {
@@ -47,7 +48,10 @@ namespace Statistics
                 }
                 fps.Add(name, rb);
             }
-            return fps[name];
+
+            lock (rb) {
+                rb.Add(val);
+            }
         }
 
 
@@ -69,8 +73,9 @@ namespace Statistics
 
             int sum = 0;
             int values = 0;
-            lock(fps[name]){//Interestingly this is not enough...
-                foreach (int i in fps[name]) {//Exception was thrown by ringbuffer.cs:141 from this...
+            RingBuffer<int> rb = fps[name];
+            lock (rb) {
+                foreach (int i in rb) {
                     if (i >= 0) {
                         sum += i;
                         values++;
