@@ -320,9 +320,10 @@ public class Canvas : GameWindow
         HUDprintLine(pfps_str);
         HUDprintLine(String.Format("Gamma: {0}",universe.bro.gamma));
         HUDprintLine(String.Format("Gamma*Vrms: {0}",universe.bro.gamma*universe.bro.vrms));
-        HUDprintLine(String.Format("Your watch: {0}",universe.bro.t_object));
-        HUDprintLine(String.Format("Wall clock: {0}",universe.universe_time));
-        HUDprintLine(String.Format("Position: \n{0}\n{1}\n{2}",universe.bro.x[0],universe.bro.x[1],universe.bro.x[2]));
+        HUDprintLine(String.Format("Vrms: {0}",universe.bro.vrms));
+        HUDprintLine(String.Format("Your watch: {0:F3}",universe.bro.t_object));
+        HUDprintLine(String.Format("Wall clock: {0:F3}",universe.universe_time));
+        HUDprintLine(String.Format("Position: \n{0:F4}\n{1:F4}\n{2:F4}",universe.bro.x[0],universe.bro.x[1],universe.bro.x[2]));
 
         if(am_using_reticle){
             HUDdrawReticle();
