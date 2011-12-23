@@ -218,15 +218,15 @@ public static class CoordinateEngine
     //Returns 1/sqrt(RMS(v))
     public static double computeGamma(double[] v)
     {
-        double answer = 1.0-RMS(v);
+        /*double answer = 1.0-RMS(v)*RMS(v);
         //Debug.Assert(RMS(v)<1.0, "Speed of light is exceeded on gamma calculation");
         answer = 1.0/Math.Sqrt(answer);//This line also will complain about vrms>1.0
-        return answer;
-        //return computeGamma(RMS (v));//Also should work
+        return answer;*/
+        return computeGamma(RMS (v));//Also should work
     }
     public static double computeGamma(double vrms)
     {
-        double answer = 1.0-vrms;
+        double answer = 1.0-vrms*vrms;
         //Debug.Assert(vrms<1.0, "Speed of light is exceeded on gamma calculation");
         answer = 1.0/Math.Sqrt(answer);//This line also will complain about vrms>1.0
         return answer;
