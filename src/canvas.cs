@@ -22,6 +22,7 @@ public class Canvas : GameWindow
     private const int FPS_WINDOW = 30;
     private const int LINE_SPACING = 50;
     public const string FPS_TAG = "Render";
+    private const bool SHOULD_LORENTZ_TRANSFORM_IMAGE=true;
 
     // Indices.
     private const int _x = 0;
@@ -214,12 +215,23 @@ public class Canvas : GameWindow
     /// </remarks>
     private void DrawRelativisticObject(CoordinateEngine.RelativisticObject ro, bool issilver = true)
     {
-        double x = ro.x[_x];
-        double y = ro.x[_y];
-        double z = ro.x[_z];
+        double x;
+        double y;
+        double z;
+        if(SHOULD_LORENTZ_TRANSFORM_IMAGE){
+            double[] apparent_position = CoordinateEngine.apparentPosition(ro.x,universe.bro.x,universe.bro.v);
+            x = apparent_position[_x];
+            y = apparent_position[_y];
+            z = apparent_position[_z];
+        }else{
+            x = ro.x[_x];
+            y = ro.x[_y];
+            z = ro.x[_z];
+        }
 
         //double size = .01*Math.Sqrt (CoordinateEngine.RMS(universe.bro.x));
         double size = 0.042;//Diameter of the Earth if t=seconds
+        size/=2;//Turns size into the side length of the cube
 
         GL.Begin(BeginMode.Quads);
         if (issilver)

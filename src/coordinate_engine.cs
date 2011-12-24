@@ -258,4 +258,59 @@ public static class CoordinateEngine
         double answer = -1.0 + mygamma * (1+v_parallel_component);
         return answer;
     }
+    //Returns the laplace transform of the position vector x_input
+    //See http://en.wikipedia.org/wiki/Lorenz_transformation#Boost_in_any_direction
+    //In this method we are ignoring the time coordinate, but otherwise emulating the matrix operation
+    public static double[] laplaceTransform(double[] x_input, double[] v, double t)
+    {
+        if(x_input.Length!=v.Length){
+            throw new IndexOutOfRangeException();
+        }
+        int dim = x_input.Length;//dimension, likely 3 but keeps this flexible
+        double vrms = RMS (v);
+        double gamma = computeGamma(v);
+        double[] answer = new double[dim];
+
+        if(vrms!=0){//then compute normally
+            for(int i=0;i<dim;i++)
+            {
+                answer[i]=0;
+                //time part
+                answer[i]+= - v[i]*gamma*t;
+                //position parts
+                for(int j=0;j<dim;j++)
+                {
+                    if(j==i){
+                        answer[i]+=x_input[j];
+                    }
+                    answer[i]+=x_input[j]*(gamma-1)*v[i]*v[j]/vrms/vrms;
+                }
+            }
+            return answer;
+        }else{//v==0, so the transformation is the identity matrix.  Aka return the input.
+              //(otherwise we get NAN if we compute 1+(1-1)*(0/0), which should approach 1)
+            return x_input;
+        }
+    }
+    //Useful to use for calculating where something at x_input should appear based on the observer's x and v
+    public static double[] apparentPosition(double[] x_input, double[] x_observer, double[] v_observer)
+    {
+        if(x_input.Length!=x_observer.Length||x_input.Length!=v_observer.Length){
+            throw new IndexOutOfRangeException();
+        }
+        int dim = x_input.Length;
+        double[] answer = new double[dim];
+        for(int i=0;i<dim;i++){
+            answer[i]=x_input[i]-x_observer[i];
+        }
+        //Assumption: object is in time/position for a photon to reach the observer
+        // --> thus t = -(dist_to_observer)
+        double t = -RMS(answer);
+
+        answer = laplaceTransform(answer, v_observer,t);
+        for(int i=0;i<dim;i++){
+            answer[i]+=x_observer[i];
+        }
+        return answer;
+    }
 }
