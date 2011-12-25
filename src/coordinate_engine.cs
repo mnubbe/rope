@@ -261,7 +261,7 @@ public static class CoordinateEngine
     //Returns the laplace transform of the position vector x_input
     //See http://en.wikipedia.org/wiki/Lorenz_transformation#Boost_in_any_direction
     //In this method we are ignoring the time coordinate, but otherwise emulating the matrix operation
-    public static double[] laplaceTransform(double[] x_input, double[] v, double t)
+    public static double[] LorenzTransform(double[] x_input, double[] v, double t)
     {
         if(x_input.Length!=v.Length){
             throw new IndexOutOfRangeException();
@@ -293,7 +293,7 @@ public static class CoordinateEngine
         }
     }
     //Useful to use for calculating where something at x_input should appear based on the observer's x and v
-    public static double[] apparentPosition(double[] x_input, double[] x_observer, double[] v_observer)
+    public static double[] ApparentPosition(double[] x_input, double[] x_observer, double[] v_observer)
     {
         if(x_input.Length!=x_observer.Length||x_input.Length!=v_observer.Length){
             throw new IndexOutOfRangeException();
@@ -307,7 +307,7 @@ public static class CoordinateEngine
         // --> thus t = -(dist_to_observer)
         double t = -RMS(answer);
 
-        answer = laplaceTransform(answer, v_observer,t);
+        answer = LorenzTransform(answer, v_observer,t);
         for(int i=0;i<dim;i++){
             answer[i]+=x_observer[i];
         }

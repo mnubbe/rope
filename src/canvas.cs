@@ -219,7 +219,7 @@ public class Canvas : GameWindow
         double y;
         double z;
         if(SHOULD_LORENTZ_TRANSFORM_IMAGE){
-            double[] apparent_position = CoordinateEngine.apparentPosition(ro.x,universe.bro.x,universe.bro.v);
+            double[] apparent_position = CoordinateEngine.ApparentPosition(ro.x,universe.bro.x,universe.bro.v);
             x = apparent_position[_x];
             y = apparent_position[_y];
             z = apparent_position[_z];
