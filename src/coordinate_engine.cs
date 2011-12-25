@@ -258,7 +258,7 @@ public static class CoordinateEngine
         double answer = -1.0 + mygamma * (1+v_parallel_component);
         return answer;
     }
-    //Returns the laplace transform of the position vector x_input
+    //Returns the Lorenz transform of the position vector x_input
     //See http://en.wikipedia.org/wiki/Lorenz_transformation#Boost_in_any_direction
     //In this method we are ignoring the time coordinate, but otherwise emulating the matrix operation
     public static double[] LorenzTransform(double[] x_input, double[] v, double t)
@@ -311,6 +311,34 @@ public static class CoordinateEngine
         for(int i=0;i<dim;i++){
             answer[i]+=x_observer[i];
         }
+        return answer;
+    }
+    //Rapidity: has the advantage that if accelerating in one direction it will increase steadily
+    //See http://en.wikipedia.org/wiki/Rapidity for more info
+    public static double[] Rapidity(double[] v)
+    {
+        int dim = v.Length;
+        double[] answer = new double[dim];
+        double vrms = RMS(v);
+        if(vrms!=0){//Then compute it normally
+            double r_rms = ATanH(vrms);
+            for(int i=0;i<dim;i++){
+                answer[i]=r_rms*v[i]/vrms;
+            }
+            return answer;
+        }else{//v==0, so rapidity will be 0
+            for(int i=0;i<dim;i++){
+                answer[i]=0;
+            }
+            return answer;
+        }
+    }
+    //Inverse hyperbolic tangent
+    private static double ATanH(double input)
+    {
+        double answer = (1+input)/(1-input);
+        answer = Math.Log(answer);
+        answer /=2;
         return answer;
     }
 }

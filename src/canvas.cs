@@ -23,6 +23,7 @@ public class Canvas : GameWindow
     private const int LINE_SPACING = 50;
     public const string FPS_TAG = "Render";
     private const bool SHOULD_LORENTZ_TRANSFORM_IMAGE=true;
+    private const bool SHOULD_PRINT_RAPIDITY=false;
 
     // Indices.
     private const int _x = 0;
@@ -324,6 +325,7 @@ public class Canvas : GameWindow
         string pfps_str = String.Format("physics: {0} FPS",
             ((int)stats.GetFPS("physics")));
 
+        double[] rapidity = CoordinateEngine.Rapidity(universe.bro.v);
 
         //Note about printer: mono seems to have a memory leak from this unless it is manually .Dispose() 'd of
         //Or only a finite number of instances are made (1 from constructor seems fine)
@@ -336,6 +338,14 @@ public class Canvas : GameWindow
         HUDprintLine(String.Format("Your watch: {0:F3}",universe.bro.t_object));
         HUDprintLine(String.Format("Wall clock: {0:F3}",universe.universe_time));
         HUDprintLine(String.Format("Position: \n{0:F4}\n{1:F4}\n{2:F4}",universe.bro.x[0],universe.bro.x[1],universe.bro.x[2]));
+        linenumber+=3;
+        if(SHOULD_PRINT_RAPIDITY){
+            //Print next to the position statement
+            RectangleF m_rect = new RectangleF(50+100,50+25*(linenumber-1),500,50);
+            printer.Print(String.Format("Rapidity: \n{0:F4}\n{1:F4}\n{2:F4}",rapidity[0],rapidity[1],rapidity[2]),
+                          font,Color.White,m_rect);
+        }
+
 
         if(am_using_reticle){
             HUDdrawReticle();
