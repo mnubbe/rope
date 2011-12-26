@@ -155,8 +155,9 @@ public static class CoordinateEngine
     
     //Returns the relativistic sum of two velocities (adding v2 onto v1).  Does not require a RelativisticObject but likely to use RelativisticObject.v.
     //Note that the addition is NOT straightforward, which is why this is provided
-    //Also, it is not unless they are parallel/antiparallel...
+    //Also, it is not commutative unless they are parallel/antiparallel...
     //Reference: http://en.wikipedia.org/wiki/Velocity-addition_formula
+    //Best way to think about the operation: take v2 and boost it by v1
     public static double[] velocitySum(double[] v1, double[] v2)
     {
         if(v1.Length!=v2.Length){
@@ -187,7 +188,7 @@ public static class CoordinateEngine
     //Returns the relative position difference as seen by the observer RelativisticObject
     //public static double[] observedPositionDifference(RelativisticObject observer, RelativisticObject actor)
 
-    //Returns the position difference based on the reference frame (ignores Lorentz contraction)
+    //Returns the position difference based on the reference frame (includes lorentz transform for observer)
     public static double[] referencePositionDifference(RelativisticObject observer, RelativisticObject actor)
     {
         double[] answer =  new double[observer.x.Length];
@@ -195,9 +196,11 @@ public static class CoordinateEngine
         {
             answer[i] = actor.x[i] - observer.x[i];
         }
+        //Assumption that the time is based on distance (true if observer sees actor in terms of a photon path)
+        answer = LorenzTransform(answer,observer.v,-RMS(answer));
         return answer;
     }
-    
+
     //Functions that may be useful to have
     
     //RMS=Root Mean Squared.  Also known by the distance formula or vector magnitude
@@ -315,6 +318,7 @@ public static class CoordinateEngine
     }
     //Rapidity: has the advantage that if accelerating in one direction it will increase steadily
     //See http://en.wikipedia.org/wiki/Rapidity for more info
+    //Note, several assumptions were made about it in more than 1 dimension... may be invalid
     public static double[] Rapidity(double[] v)
     {
         int dim = v.Length;
