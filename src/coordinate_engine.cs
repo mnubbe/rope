@@ -235,7 +235,31 @@ public static class CoordinateEngine
         {
             sum+=x*x;
         }
-        return System.Math.Sqrt(sum);
+        return Math.Sqrt(sum);
+    }
+    //Returns a+b
+    private static double[] sum(double[] a,double[] b)
+    {
+        if(a.Length!=b.Length){
+            throw new IndexOutOfRangeException("Array inputs do not match in dimension");
+        }
+        double[] answer = new double[a.Length];
+        for(int i=0;i<a.Length;i++){
+            answer[i]=a[i]+b[i];
+        }
+        return answer;
+    }
+    //Returns a-b
+    private static double[] difference(double[] a,double[] b)
+    {
+        if(a.Length!=b.Length){
+            throw new IndexOutOfRangeException("Array inputs do not match in dimension");
+        }
+        double[] answer = new double[a.Length];
+        for(int i=0;i<a.Length;i++){
+            answer[i]=a[i]-b[i];
+        }
+        return answer;
     }
     
     //Returns 1/sqrt(RMS(v))
@@ -277,6 +301,18 @@ public static class CoordinateEngine
         double mygamma = computeGamma(velocity_rms);
         double[] position_difference = referencePositionDifference(observer,emitter);
         double v_parallel_component = dotProduct(velocity_difference,position_difference)/RMS (position_difference);
+
+        double answer = -1.0 + mygamma * (1+v_parallel_component);
+        return answer;
+    }
+    public static double calculateRedshiftZ(RelativisticObject relative_emitter, double[] observer_position)
+    {//Requires the observer to be stationary at a given position
+        double[] v = relative_emitter.v;
+
+        double velocity_rms = relative_emitter.vrms;
+        double mygamma = relative_emitter.gamma;
+        double[] position_difference = difference(observer_position,relative_emitter.x);
+        double v_parallel_component = dotProduct(v,position_difference)/RMS (position_difference);
 
         double answer = -1.0 + mygamma * (1+v_parallel_component);
         return answer;
