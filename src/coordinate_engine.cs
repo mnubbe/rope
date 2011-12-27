@@ -137,42 +137,62 @@ public static class CoordinateEngine
             t = (universe_time - RMS (referencePositionDifference (camera, this)));
             return t;
         }
+
+        //Returns a RO that is positioned relative to the observer in the observer's rest frame
+        //More or less does a lorentz transform of that object in reference to the observer
+        public RelativisticObject GetApparentObject(RelativisticObject observer)
+        {
+            return GetApparentObject(observer.x,observer.v);
+        }
+        public RelativisticObject GetApparentObject(double[] observer_position, double[] observer_v)
+        {
+            //Calculate v
+            double[] newv = velocityDifference(observer_v,v);
+            //Calculate position (aka x)
+            double[] newx = ApparentPosition(x,observer_position,observer_position);
+            return new RelativisticObject(newx,newv);
+        }
     }
 
     //Functions that operate on at least one RelativisticObject
     //Returns the relative velocity of the actor from the observer's perspective
     public static double[] velocityDifference(RelativisticObject observer, RelativisticObject actor)
     {
-        //Debug.Assert(observer.v.Length == actor.v.Length, "Coordinate dimensionality mismatch");
-        //stupidly short way to implement:
-        double[] negative_actor_v = new double[actor.v.Length];
-        for(int i=0;i<actor.v.Length;i++){
-            negative_actor_v[i] = -actor.v[i];
+        return velocityDifference(observer.v,actor.v);
+    }
+    public static double[] velocityDifference(double[] observer_v, double[] actor_v)
+    {
+        double[] negative_actor_v = new double[actor_v.Length];
+        for(int i=0;i<actor_v.Length;i++){
+            negative_actor_v[i] = -actor_v[i];
         }
-        //Debug.Assert(RMS(answer)<=1, "Speed of light exceeded");//This should never exceed c unless we have tacheons, which can break other parts of the simulation
-        return velocitySum(observer.v,negative_actor_v);
+        return velocitySum(observer_v,negative_actor_v);
     }
     
-    //Returns the relativistic sum of two velocities (adding v2 onto v1).  Does not require a RelativisticObject but likely to use RelativisticObject.v.
+    //Returns the relativistic sum of two velocities (adding u onto frame_boost_v).  Does not require a RelativisticObject but likely to use RelativisticObject.v.
     //Note that the addition is NOT straightforward, which is why this is provided
     //Also, it is not commutative unless they are parallel/antiparallel...
     //Reference: http://en.wikipedia.org/wiki/Velocity-addition_formula
-    //Best way to think about the operation: take v2 and boost it by v1
-    public static double[] velocitySum(double[] v1, double[] v2)
+    //Best way to think about the operation: take u and boost it by frame_boost_v
+    public static double[] velocitySum(double[] frame_boost_v, double[] u)
     {
-        if(v1.Length!=v2.Length){
+        if(frame_boost_v.Length!=u.Length){
             throw new IndexOutOfRangeException("Array inputs do not match in dimension");
         }
-        //Debug.Assert(v1.Length == v2.Length, "Coordinate dimensionality mismatch");
-        double[] answer =  new double[v1.Length];
-        double dot_product = dotProduct(v1,v2);
-        double v1_gamma = computeGamma(v1);
-        for(int i=0;i<v1.Length;i++){
-            answer[i] = v1[i]+v2[i]/v1_gamma+dot_product*v1[i]*v1_gamma/(1+v1_gamma);
+        double[] answer =  new double[frame_boost_v.Length];
+        double dot_product = dotProduct(frame_boost_v,u);
+        double frame_gamma = computeGamma(frame_boost_v);
+        for(int i=0;i<frame_boost_v.Length;i++){
+            answer[i] = frame_boost_v[i]+u[i]/frame_gamma+
+                dot_product*frame_boost_v[i]*frame_gamma/(1+frame_gamma);
             answer[i] /= (1+dot_product);
         }
         //Debug.Assert(RMS(answer)<=1, "Speed of light exceeded");//This should never exceed c unless we have tacheons, which will break other parts of the simulation
         return answer;
+    }
+    public static double[] velocitySum(RelativisticObject observer, double[] u)
+    {//Note: u is seen from observer's perspective, sum returns from the universe's perspective
+        return velocitySum(observer.v,u);
     }
 
     //Returns the dot product of a and b (think vectors)
