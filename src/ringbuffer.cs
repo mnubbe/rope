@@ -4,8 +4,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+//using System.Linq;//Can't seem to find any need of these
+//using System.Text;
 using System.Collections;
 using System.Diagnostics;
 
